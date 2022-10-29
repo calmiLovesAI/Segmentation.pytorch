@@ -2,6 +2,8 @@ import os.path
 
 from torch.utils.data import Dataset
 
+from utils.read_image import cv2_read_image
+
 # PASCAL VOC数据集中每种类别对应的颜色的RGB值
 VOC_TABLE = {
     "background": (0, 0, 0),
@@ -41,7 +43,9 @@ class VOCSegmentation(Dataset):
         :param transform:
         """
         super(VOCSegmentation, self).__init__()
-        voc_root = os.path.join(root, "VOC2012")
+        self.transform = transform
+
+        voc_root = os.path.join(root, "VOCdevkit", "VOC2012")
         if not os.path.isdir(voc_root):
             raise RuntimeError("Dataset not found.")
         splits_dir = os.path.join(voc_root, "ImageSets", "Segmentation")
@@ -59,4 +63,9 @@ class VOCSegmentation(Dataset):
         return len(self.images)
 
     def __getitem__(self, item):
-        pass
+        img = cv2_read_image(self.images[item])
+        target = cv2_read_image(self.targets[item])
+
+        if self.transform is not None:
+            img, target = self.transform(img, target)
+        return img, target
