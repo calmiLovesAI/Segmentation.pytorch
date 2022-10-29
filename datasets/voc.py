@@ -1,3 +1,7 @@
+import os.path
+
+from torch.utils.data import Dataset
+
 # PASCAL VOC数据集中每种类别对应的颜色的RGB值
 VOC_TABLE = {
     "background": (0, 0, 0),
@@ -26,3 +30,33 @@ VOC_TABLE = {
 VOC_COLORMAP = [v for v in VOC_TABLE.values()]
 
 VOC_CLASSES = [k for k in VOC_TABLE.keys()]
+
+
+class VOCSegmentation(Dataset):
+    def __init__(self, root, image_set, transform=None):
+        """
+        VOC2012语义分割数据集
+        :param root: (string) – Root directory of the VOC Dataset.
+        :param image_set: (string, optional) – Select the image_set to use, "train", "trainval" or "val". If year=="2007", can also be "test".
+        :param transform:
+        """
+        super(VOCSegmentation, self).__init__()
+        voc_root = os.path.join(root, "VOC2012")
+        if not os.path.isdir(voc_root):
+            raise RuntimeError("Dataset not found.")
+        splits_dir = os.path.join(voc_root, "ImageSets", "Segmentation")
+        split_f = os.path.join(splits_dir, image_set.rstrip("\n") + ".txt")   # train.txt, trainval.txt, val.txt
+        with open(split_f) as f:
+            file_names = [x.strip() for x in f.readlines()]
+        image_dir = os.path.join(voc_root, "JPEGImages")
+        self.images = [os.path.join(image_dir, x + ".jpg") for x in file_names]
+
+        target_dir = os.path.join(voc_root, "SegmentationClass")
+        self.targets = [os.path.join(target_dir, x + ".png") for x in file_names]
+        assert len(self.images) == len(self.targets)
+
+    def __len__(self):
+        return len(self.images)
+
+    def __getitem__(self, item):
+        pass
