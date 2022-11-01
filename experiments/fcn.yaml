@@ -1,0 +1,22 @@
+Train:
+  start_epoch: 0
+  epochs: 50
+  batch_size: 8
+  # 输入图片大小：(C, H, W)
+  input_size:
+    - 3
+    - 256
+    - 256
+  # 初始学习率
+  learning_rate: 0.001
+  # 训练之前加载权重
+  load_weights: ""   # 权重文件的路径(str)
+  # 模型保存频率
+  save_frequency: 5
+  # 保存路径
+  save_path: "outputs"
+  tensorboard_on: true
+Test:
+  load_pth: ""
+  test_pictures:
+    - ""

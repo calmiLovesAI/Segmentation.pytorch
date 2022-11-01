@@ -2,7 +2,7 @@ import os.path
 
 from torch.utils.data import Dataset
 
-from utils.read_image import cv2_read_image
+from utils.preprocess import cv2_read_image
 
 # PASCAL VOC数据集中每种类别对应的颜色的RGB值
 VOC_TABLE = {

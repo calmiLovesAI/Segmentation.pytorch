@@ -1,0 +1,1 @@
+This folder contains the trained model, test examples and test results.
