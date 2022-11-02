@@ -29,6 +29,7 @@ def get_voc_dataloader(cfg, is_train=True):
                                   RGB2idx(voc_colormap2label),
                                   RandomCrop(256, 256),
                               ]))
+    print(f"Loading {image_set} dataset with {len(dataset)} samples")
     dataloader = DataLoader(dataset, batch_size=2, shuffle=shuffle)
     # for i, (image, target) in enumerate(dataloader):
     #     print(f"i = {i}")
