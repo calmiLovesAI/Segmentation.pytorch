@@ -3,20 +3,6 @@ import torch
 import torchvision.transforms
 import torchvision.transforms.functional as F
 
-from datasets.voc import VOC_COLORMAP
-
-
-def colormap2label(colormap):
-    """
-    构建从RGB到类别索引的映射
-    :param colormap: list
-    :return:
-    """
-    colormap2label = torch.zeros(256 ** 3, dtype=torch.long)
-    for i, color in enumerate(colormap):
-        colormap2label[(color[0] * 256 + color[1]) * 256 + color[2]] = i
-    return colormap2label
-
 
 def label_indices(colormap, colormap2label):
     """
@@ -52,15 +38,18 @@ class ToTensor:
     def __call__(self, image, target):
         return F.to_tensor(image), target
 
-    def __repr__(self)->str:
+    def __repr__(self) -> str:
         return f"{self.__class__.__name__}()"
 
 
 class RGB2idx:
-    def __call__(self, image, target):
-        return image, label_indices(target, colormap2label(VOC_COLORMAP))
+    def __init__(self, colormap2label):
+        self.colormap2label = colormap2label
 
-    def __repr__(self)->str:
+    def __call__(self, image, target):
+        return image, label_indices(target, self.colormap2label)
+
+    def __repr__(self) -> str:
         return f"{self.__class__.__name__}()"
 
 

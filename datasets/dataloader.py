@@ -1,19 +1,32 @@
-import torchvision
+import torch
 from torch.utils.data import DataLoader
 
 from datasets.transform import ToTensor, RGB2idx, Compose, RandomCrop
-from datasets.voc import VOCSegmentation
+from datasets.voc import VOCSegmentation, VOC_COLORMAP
+
+
+def colormap2label(colormap):
+    """
+    构建从RGB到类别索引的映射
+    :param colormap: list
+    :return:
+    """
+    colormap2label = torch.zeros(256 ** 3, dtype=torch.long)
+    for i, color in enumerate(colormap):
+        colormap2label[(color[0] * 256 + color[1]) * 256 + color[2]] = i
+    return colormap2label
 
 
 def get_voc_dataloader(cfg, is_train=True):
     image_set = "train" if is_train else "val"
     shuffle = True if is_train else False
+    voc_colormap2label = colormap2label(VOC_COLORMAP)
     dataset = VOCSegmentation(root="data",
                               image_set=image_set,
                               crop_size=(256, 256),
                               transform=Compose([
                                   ToTensor(),
-                                  RGB2idx(),
+                                  RGB2idx(voc_colormap2label),
                                   RandomCrop(256, 256),
                               ]))
     dataloader = DataLoader(dataset, batch_size=2, shuffle=shuffle)
