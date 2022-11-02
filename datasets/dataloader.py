@@ -17,17 +17,17 @@ def colormap2label(colormap):
     return colormap2label
 
 
-def get_voc_dataloader(cfg, is_train=True):
+def get_voc_dataloader(root, crop_size, is_train=True):
     image_set = "train" if is_train else "val"
     shuffle = True if is_train else False
     voc_colormap2label = colormap2label(VOC_COLORMAP)
-    dataset = VOCSegmentation(root="data",
+    dataset = VOCSegmentation(root=root,
                               image_set=image_set,
-                              crop_size=(256, 256),
+                              crop_size=crop_size,
                               transform=Compose([
                                   ToTensor(),
                                   RGB2idx(voc_colormap2label),
-                                  RandomCrop(256, 256),
+                                  RandomCrop(*crop_size),
                               ]))
     print(f"Loading {image_set} dataset with {len(dataset)} samples")
     dataloader = DataLoader(dataset, batch_size=2, shuffle=shuffle)

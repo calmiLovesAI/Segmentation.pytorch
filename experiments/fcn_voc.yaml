@@ -1,3 +1,7 @@
+Dataset:
+  root: "data"
+  name: "VOC"
+  num_classes: 20
 Train:
   start_epoch: 0
   epochs: 50
