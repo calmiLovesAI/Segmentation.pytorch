@@ -7,7 +7,7 @@ from core.loss import cross_entropy
 from utils.tools import MeanMetric
 
 
-def train_loop(cfg, model, train_loader, valid_loader):
+def train_loop(cfg, model, train_dataloader, valid_dataloader):
     print("The training hyperparameters are as follows:")
     for k, v in cfg["Train"].items():
         print(f"{k} : {v}")
@@ -35,7 +35,7 @@ def train_loop(cfg, model, train_loader, valid_loader):
 
     for epoch in range(start_epoch, epochs):
         model.train()
-        with tqdm(train_loader, desc=f"Epoch-{epoch}/{epochs}") as pbar:
+        with tqdm(train_dataloader, desc=f"Epoch-{epoch}/{epochs}") as pbar:
             for i, (images, targets) in enumerate(pbar):
                 images = images.to(device)
                 targets = targets.to(device)
