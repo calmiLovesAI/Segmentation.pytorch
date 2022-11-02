@@ -4,7 +4,7 @@ from pathlib import Path
 
 import cv2
 import torch
-import torchvision.transforms.functional
+import torchvision
 
 from core.parse import update_cfg
 from core.post_process import PostProcess
