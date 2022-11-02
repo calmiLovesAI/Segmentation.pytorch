@@ -4,3 +4,5 @@ __pycache__
 !/data/README.md
 /outputs/*
 !/outputs/README.md
+/results/*
+!/results/README.md

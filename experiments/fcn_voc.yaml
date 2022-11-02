@@ -23,6 +23,8 @@ Train:
   save_path: "outputs"
   tensorboard_on: true
 Test:
-  load_pth: ""
+  test_results: "results"
   test_pictures:
-    - ""
+    - "outputs/2007_000032.jpg"
+    - "outputs/2007_000033.jpg"
+    - "outputs/2007_000241.jpg"
