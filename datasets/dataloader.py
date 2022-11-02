@@ -10,6 +10,7 @@ def get_voc_dataloader(cfg, is_train=True):
     shuffle = True if is_train else False
     dataset = VOCSegmentation(root="data",
                               image_set=image_set,
+                              crop_size=(256, 256),
                               transform=Compose([
                                   ToTensor(),
                                   RGB2idx(),

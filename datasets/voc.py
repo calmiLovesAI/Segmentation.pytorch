@@ -35,36 +35,47 @@ VOC_CLASSES = [k for k in VOC_TABLE.keys()]
 
 
 class VOCSegmentation(Dataset):
-    def __init__(self, root, image_set, transform=None):
+    def __init__(self, root, image_set, crop_size, transform=None):
         """
         VOC2012语义分割数据集
         :param root: (string) – Root directory of the VOC Dataset.
         :param image_set: (string, optional) – Select the image_set to use, "train", "trainval" or "val". If year=="2007", can also be "test".
+        :param crop_size: (tuple) - 随机剪裁后的图片大小
         :param transform:
         """
         super(VOCSegmentation, self).__init__()
+        self.crop_size = crop_size
         self.transform = transform
 
         voc_root = os.path.join(root, "VOCdevkit", "VOC2012")
         if not os.path.isdir(voc_root):
             raise RuntimeError("Dataset not found.")
         splits_dir = os.path.join(voc_root, "ImageSets", "Segmentation")
-        split_f = os.path.join(splits_dir, image_set.rstrip("\n") + ".txt")   # train.txt, trainval.txt, val.txt
+        split_f = os.path.join(splits_dir, image_set.rstrip("\n") + ".txt")  # train.txt, trainval.txt, val.txt
         with open(split_f) as f:
             file_names = [x.strip() for x in f.readlines()]
         image_dir = os.path.join(voc_root, "JPEGImages")
         self.images = [os.path.join(image_dir, x + ".jpg") for x in file_names]
+        self.images = list(map(cv2_read_image, self.images))
+        self.images = self._filter(self.images)
 
         target_dir = os.path.join(voc_root, "SegmentationClass")
         self.targets = [os.path.join(target_dir, x + ".png") for x in file_names]
+        self.targets = list(map(cv2_read_image, self.targets))
+        self.targets = self._filter(self.targets)
         assert len(self.images) == len(self.targets)
 
     def __len__(self):
         return len(self.images)
 
+    def _filter(self, imgs):
+        return [
+            img for img in imgs if (img.shape[0] >= self.crop_size[0] and img.shape[1] >= self.crop_size[1])
+        ]
+
     def __getitem__(self, item):
-        img = cv2_read_image(self.images[item])
-        target = cv2_read_image(self.targets[item])
+        img = self.images[item]
+        target = self.targets[item]
 
         if self.transform is not None:
             img, target = self.transform(img, target)
