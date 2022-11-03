@@ -69,11 +69,6 @@ def calculate_correct_pixel(pred: torch.Tensor, target: torch.Tensor):
     return (x == target).type(torch.float).sum().item()
 
 
-def calculate_all_pixel(feature):
-    x = torch.where(feature > 0, 1, 0)
-    return x.sum().item()
-
-
 def evaluate_loop(model, dataloader, device):
     model.eval()
     test_loss = 0.0
@@ -88,7 +83,7 @@ def evaluate_loop(model, dataloader, device):
             pred = model(images)
             test_loss += cross_entropy(pred, targets).item()
             num_correct_pixels += calculate_correct_pixel(pred, targets)
-            num_pixels += calculate_all_pixel(targets)
+            num_pixels += (targets > 0).type(torch.float).sum().item()
     test_loss /= num_batches
     acc = num_correct_pixels / num_pixels
     print(f"\nEvaluate: Loss: {test_loss:8f}, Accuracy: {(100 * acc):0.2f}%")
