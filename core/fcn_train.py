@@ -64,6 +64,14 @@ def train_loop(cfg, model, train_dataloader, valid_dataloader):
     torch.save(model, Path(save_path).joinpath(f"FCN_{dataset_name}_entire_model.pth"))
 
 
+def calculate_correct_pixel(pred: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+    x = torch.argmax(pred, dim=1)
+    # filter out background pixels
+    y = torch.ones_like(x) * -1
+    x = torch.where(x > 0, x, y)
+    return (x == target).type(torch.float).sum().item()
+
+
 def evaluate_loop(model, dataloader, device):
     model.eval()
     test_loss = 0.0
@@ -78,7 +86,7 @@ def evaluate_loop(model, dataloader, device):
             num_pixels += images.size(0) * images.size(2) * images.size(3)
             pred = model(images)
             test_loss += cross_entropy(pred, targets).item()
-            num_correct_pixels += (pred.argmax(1) == targets).type(torch.float).sum().item()
+            num_correct_pixels += calculate_correct_pixel(pred, targets)
     test_loss /= num_batches
     acc = num_correct_pixels / num_pixels
     print(f"Evaluate:\n Loss: {test_loss:8f}, Accuracy: {(100 * acc):0.2f}%")
