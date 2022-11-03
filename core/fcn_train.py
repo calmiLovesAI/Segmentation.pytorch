@@ -19,8 +19,6 @@ def train_loop(cfg, model, train_dataloader, valid_dataloader):
     save_path = cfg["Train"]["save_path"]
     load_weights = cfg["Train"]["load_weights"]
     tensorboard_on = cfg["Train"]["tensorboard_on"]
-    input_size = cfg["Train"]["input_size"]
-    batch_size = cfg["Train"]["batch_size"]
     initial_learning_rate = cfg["Train"]["learning_rate"]
 
     optimizer = torch.optim.SGD(params=model.parameters(), lr=initial_learning_rate, momentum=0.9, weight_decay=0.001)
