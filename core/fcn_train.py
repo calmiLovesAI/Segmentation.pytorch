@@ -70,8 +70,8 @@ def calculate_correct_pixel(pred: torch.Tensor, target: torch.Tensor):
 
 
 def calculate_all_pixel(feature):
-    feature = torch.where(feature > 0, 1, 0)
-    return feature.sum().item()
+    x = torch.where(feature > 0, 1, 0)
+    return x.sum().item()
 
 
 def evaluate_loop(model, dataloader, device):
