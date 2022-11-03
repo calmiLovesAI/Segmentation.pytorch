@@ -59,10 +59,3 @@ class Up(nn.Module):
         output = self.conv1(output)
         output = self.conv2(output)
         return output
-
-
-if __name__ == '__main__':
-    unet = UNet(21, [192, 384, 768, 1024], [64, 128, 256, 512], True)
-    x = torch.rand(2, 3, 512, 512)
-    y = unet(x)
-    print(y.size())
