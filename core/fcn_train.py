@@ -70,7 +70,8 @@ def evaluate_loop(model, dataloader, device):
     size = len(dataloader.dataset)
     num_batches = len(dataloader)
     with torch.no_grad():
-        for images, targets in dataloader:
+        for i, (images, targets) in enumerate(dataloader):
+            print(f"Progress: {(100 * (i + 1) / size)}%", end="\r")
             images = images.to(device)
             targets = targets.to(device)
             pred = model(images)
