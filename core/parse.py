@@ -10,7 +10,7 @@ def update_cfg(cfg: dict, device, use_dataset=True) -> dict:
     if cfg["Model"]["name"] == "FCN":
         cfg.update({"model": FCN(num_classes=cfg["Dataset"]["num_classes"] + 1)})
     elif cfg["Model"]["name"] == "UNet":
-        model_cfg =cfg["Model"]
+        model_cfg = cfg["Model"]
         cfg.update({"model": UNet(num_classes=cfg["Dataset"]["num_classes"] + 1,
                                   in_channels=model_cfg["Up"]["in_channels"],
                                   out_channels=model_cfg["Up"]["out_channels"],
