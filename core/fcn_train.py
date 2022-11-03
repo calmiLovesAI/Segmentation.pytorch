@@ -53,6 +53,8 @@ def train_loop(cfg, model, train_dataloader, valid_dataloader):
 
         loss_mean.reset()
 
+        evaluate_loop(model, valid_dataloader, device)
+
         if epoch % save_frequency == 0:
             torch.save(model.state_dict(),
                        Path(save_path).joinpath(f"FCN_{dataset_name}_epoch-{epoch}.pth"))
@@ -60,3 +62,20 @@ def train_loop(cfg, model, train_dataloader, valid_dataloader):
     torch.save(model.state_dict(),
                Path(save_path).joinpath(f"FCN_{dataset_name}_weights.pth"))
     torch.save(model, Path(save_path).joinpath(f"FCN_{dataset_name}_entire_model.pth"))
+
+
+def evaluate_loop(model, dataloader, device):
+    model.eval()
+    test_loss, acc = 0.0, 0.0
+    size = len(dataloader.dataset)
+    num_batches = len(dataloader)
+    with torch.no_grad():
+        for images, targets in dataloader:
+            images = images.to(device)
+            targets = targets.to(device)
+            pred = model(images)
+            test_loss += cross_entropy(pred, targets).item()
+            acc += (pred.argmax(1) == targets).type(torch.float).sum().item()
+    test_loss /= num_batches
+    acc /= size
+    print(f"Test Loss: {test_loss:8f}, Test Accuracy: {(100 * acc):0.2f}%")

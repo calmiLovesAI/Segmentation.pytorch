@@ -32,7 +32,7 @@ def main():
         print(f"Reading image: {image_path}")
 
         img = F.to_tensor(cv2_read_image(img))
-        # resize to fixed input size
+        # # resize to fixed input size
         # input_size = cfg["Train"]["input_size"][1:]
         # original_size = [img.size(1), img.size(2)]
         # img = F.resize(img, size=input_size)
