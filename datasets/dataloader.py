@@ -17,7 +17,10 @@ def colormap2label(colormap):
     return colormap2label
 
 
-def get_voc_dataloader(root, crop_size, is_train=True):
+def get_voc_dataloader(cfg, is_train=True):
+    batch_size = cfg["Train"]["batch_size"]
+    root = cfg["Dataset"]["root"]
+    crop_size = cfg["Train"]["input_size"][1:]
     image_set = "train" if is_train else "val"
     shuffle = True if is_train else False
     voc_colormap2label = colormap2label(VOC_COLORMAP)
@@ -30,7 +33,7 @@ def get_voc_dataloader(root, crop_size, is_train=True):
                                   RandomCrop(*crop_size),
                               ]))
     print(f"Loading {image_set} dataset with {len(dataset)} samples")
-    dataloader = DataLoader(dataset, batch_size=2, shuffle=shuffle)
+    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle)
     # for i, (image, target) in enumerate(dataloader):
     #     print(f"i = {i}")
     #     print(f"image形状：{image.size()}")   # torch.Size([batch, 3, 256, 256])

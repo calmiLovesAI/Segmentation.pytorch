@@ -66,17 +66,19 @@ def train_loop(cfg, model, train_dataloader, valid_dataloader):
 
 def evaluate_loop(model, dataloader, device):
     model.eval()
-    test_loss, acc = 0.0, 0.0
-    size = len(dataloader.dataset)
+    test_loss = 0.0
+    num_correct_pixels = 0
+    num_pixels = 0
     num_batches = len(dataloader)
     with torch.no_grad():
         for i, (images, targets) in enumerate(dataloader):
-            print(f"Progress: {(100 * (i + 1) / size)}%", end="\r")
+            print(f"Progress: {(100 * (i + 1) / num_batches):.0f}%", end="\r")
             images = images.to(device)
             targets = targets.to(device)
+            num_pixels += images.size(0) * images.size(2) * images.size(3)
             pred = model(images)
             test_loss += cross_entropy(pred, targets).item()
-            acc += (pred.argmax(1) == targets).type(torch.float).sum().item()
+            num_correct_pixels += (pred.argmax(1) == targets).type(torch.float).sum().item()
     test_loss /= num_batches
-    acc /= size
-    print(f"Test Loss: {test_loss:8f}, Test Accuracy: {(100 * acc):0.2f}%")
+    acc = num_correct_pixels / num_pixels
+    print(f"Evaluate:\n Loss: {test_loss:8f}, Accuracy: {(100 * acc):0.2f}%")

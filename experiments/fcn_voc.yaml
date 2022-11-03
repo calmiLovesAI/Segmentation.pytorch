@@ -6,7 +6,7 @@ Dataset:
   num_classes: 20
 Train:
   start_epoch: 0
-  epochs: 50
+  epochs: 100
   batch_size: 8
   # 输入图片大小：(C, H, W)
   input_size:
@@ -14,11 +14,11 @@ Train:
     - 320
     - 480
   # 初始学习率
-  learning_rate: 0.001
+  learning_rate: 0.0001
   # 训练之前加载权重
   load_weights: ""   # 权重文件的路径(str)
   # 模型保存频率
-  save_frequency: 5
+  save_frequency: 10
   # 保存路径
   save_path: "outputs"
   tensorboard_on: true

@@ -10,10 +10,8 @@ def update_cfg(cfg: dict, device, use_dataset=True) -> dict:
         cfg.update({"model": FCN(num_classes=cfg["Dataset"]["num_classes"] + 1)})
     if use_dataset:
         if cfg["Dataset"]["name"] == "VOC":
-            root = cfg["Dataset"]["root"]
-            crop_size = cfg["Train"]["input_size"][1:]
-            train_dataloader = get_voc_dataloader(root, crop_size, True)
-            valid_dataloader = get_voc_dataloader(root, crop_size, False)
+            train_dataloader = get_voc_dataloader(cfg, True)
+            valid_dataloader = get_voc_dataloader(cfg, False)
             cfg.update({"train_dataloader": train_dataloader})
             cfg.update({"valid_dataloader": valid_dataloader})
     return cfg
