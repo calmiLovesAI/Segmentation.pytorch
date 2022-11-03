@@ -64,11 +64,10 @@ def train_loop(cfg, model, train_dataloader, valid_dataloader):
     torch.save(model, Path(save_path).joinpath(f"FCN_{dataset_name}_entire_model.pth"))
 
 
-def calculate_correct_pixel(pred: torch.Tensor, target: torch.Tensor) -> torch.Tensor:
+def calculate_correct_pixel(pred: torch.Tensor, target: torch.Tensor):
     x = torch.argmax(pred, dim=1)
     # filter out background pixels
-    y = torch.ones_like(x) * -1
-    x = torch.where(x > 0, x, y)
+    x = torch.where(x > 0, x, -1)
     return (x == target).type(torch.float).sum().item()
 
 
