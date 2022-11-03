@@ -89,4 +89,4 @@ def evaluate_loop(model, dataloader, device):
             num_correct_pixels += calculate_correct_pixel(pred, targets)
     test_loss /= num_batches
     acc = num_correct_pixels / num_pixels
-    print(f"Evaluate:\n Loss: {test_loss:8f}, Accuracy: {(100 * acc):0.2f}%")
+    print(f"\nEvaluate: Loss: {test_loss:8f}, Accuracy: {(100 * acc):0.2f}%")
