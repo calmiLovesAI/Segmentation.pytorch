@@ -13,8 +13,8 @@ from utils.tools import load_yaml, cv2_read_image
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--cfg", type=str, default='', help="yaml path")
-    parser.add_argument("--ckpt", type=str, default='', help="model checkpoint path")
+    parser.add_argument('--cfg', type=str, default='', help='yaml path')
+    parser.add_argument('--ckpt', type=str, default='', help='model checkpoint path')
     args = parser.parse_args()
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

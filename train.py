@@ -1,14 +1,16 @@
 import torch
 import argparse
 
-from core.fcn_train import train_loop
+from core.fcn_train import train_loop, evaluate_loop
 from core.parse import update_cfg
 from utils.tools import load_yaml
 
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--cfg", type=str, default='', help="yaml path")
+    parser.add_argument('--cfg', type=str, default='', help='yaml path')
+    parser.add_argument('--mode', type=str, default='train', help='train mode or valid mode')
+    parser.add_argument('--ckpt', type=str, default='', help='model checkpoint path')
     args = parser.parse_args()
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -21,7 +23,11 @@ def main():
     train_dataloader = cfg["train_dataloader"]
     valid_dataloader = cfg["valid_dataloader"]
 
-    train_loop(cfg, model, train_dataloader, valid_dataloader)
+    if args.mode == "train":
+        train_loop(cfg, model, train_dataloader, valid_dataloader)
+    if args.mode == "valid":
+        model.load_state_dict(torch.load(args.ckpt, map_location=device))
+        evaluate_loop(model, valid_dataloader, device)
 
 
 if __name__ == '__main__':

@@ -20,7 +20,13 @@ data
 python train.py --cfg experiments/fcn_voc.yaml
 ```
 
-### 1.3 Test
+### 1.3 Evaluate 
+```commandline
+python train.py --cfg experiments/fcn_voc.yaml --mode valid --ckpt outputs/FCN_VOC_weights.pth
+```
+
+
+### 1.4 Test
 ```commandline
 python test.py --cfg experiments/fcn_voc.yaml --ckpt outputs/FCN_VOC_weights.pth
 ```
