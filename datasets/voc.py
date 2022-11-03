@@ -4,7 +4,7 @@ from torch.utils.data import Dataset
 
 from utils.tools import cv2_read_image
 
-# PASCAL VOC数据集中每种类别对应的颜色的RGB值
+# the RGB value of the color corresponding to each category in the PASCAL VOC dataset
 VOC_TABLE = {
     "background": (0, 0, 0),
     "aeroplane": (128, 0, 0),
