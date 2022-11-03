@@ -14,3 +14,13 @@ data
             |-------SegmentationClass
             |-------SegmentationObject
 ```
+
+### 1.2 Train
+```commandline
+python train.py --cfg experiments/fcn_voc.yaml
+```
+
+### 1.3 Test
+```commandline
+python test.py --cfg experiments/fcn_voc.yaml --ckpt outputs/FCN_VOC_weights.pth
+```
