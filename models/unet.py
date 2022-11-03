@@ -20,9 +20,31 @@ class UNet(nn.Module):
             self.backbone = vgg16_bn(weights=None)
         del self.backbone.classifier
         del self.backbone.avgpool
+        print(self.backbone)
+
+        self.up4 = Up(in_channels[3], out_channels[3])
+        self.up3 = Up(in_channels[2], out_channels[2])
+        self.up2 = Up(in_channels[1], out_channels[1])
+        self.up1 = Up(in_channels[0], out_channels[0])
+
+        self.final = nn.Conv2d(in_channels=out_channels[0], out_channels=num_classes, kernel_size=1, stride=1,
+                               padding=0)
 
     def forward(self, x):
-        pass
+        feat1 = self.backbone.features[:6](x)
+        feat2 = self.backbone.features[6:13](feat1)
+        feat3 = self.backbone.features[13:23](feat2)
+        feat4 = self.backbone.features[23:33](feat3)
+        feat5 = self.backbone.features[33:-1](feat4)
+
+        up4 = self.up4(feat4, feat5)
+        up3 = self.up3(feat3, up4)
+        up2 = self.up2(feat2, up3)
+        up1 = self.up1(feat1, up2)
+
+        output = self.final(up1)
+
+        return output
 
 
 class Up(nn.Module):
@@ -41,3 +63,6 @@ class Up(nn.Module):
 
 if __name__ == '__main__':
     unet = UNet(21, [192, 384, 768, 1024], [64, 128, 256, 512], True)
+    x = torch.rand(2, 3, 512, 512)
+    y = unet(x)
+    print(y.size())
