@@ -1,0 +1,44 @@
+Model:
+  name: "UNet"
+  backbone:
+    name: "vgg16"
+    pretrained: true
+  Up:
+    in_channels:
+      - 192
+      - 384
+      - 768
+      - 1024
+    out_channels:
+      - 64
+      - 128
+      - 256
+      - 512
+Dataset:
+  root: "data"
+  name: "VOC"
+  num_classes: 20
+Train:
+  start_epoch: 0
+  epochs: 100
+  batch_size: 8
+  # 输入图片大小：(C, H, W)
+  input_size:
+    - 3
+    - 320
+    - 480
+  # 初始学习率
+  learning_rate: 0.001
+  # 训练之前加载权重
+  load_weights: ""   # 权重文件的路径(str)
+  # 模型保存频率
+  save_frequency: 10
+  # 保存路径
+  save_path: "outputs"
+  tensorboard_on: true
+Test:
+  test_results: "results"
+  test_pictures:
+    - "outputs/2007_000032.jpg"
+    - "outputs/2007_000033.jpg"
+    - "outputs/2007_000241.jpg"
