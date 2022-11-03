@@ -28,6 +28,8 @@ def main():
     test_images = cfg["Test"]["test_pictures"]
     for img in test_images:
         image_path = img
+        if not os.path.isfile(image_path):
+            raise RuntimeError(f"Could not find {image_path}. Make sure the file exists.")
         image_name = Path(image_path).stem
         print(f"Reading image: {image_path}")
 
