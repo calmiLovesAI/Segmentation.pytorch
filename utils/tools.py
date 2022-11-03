@@ -22,7 +22,7 @@ class MeanMetric:
 def load_yaml(filepath: List[str]) -> dict:
     cfg = dict()
     for file in filepath:
-        print("Loading {}...".format(file))
+        print("Reading {}...".format(file))
         with open(file, encoding="utf-8") as f:
             # cfg |= yaml.load(f.read(), Loader=yaml.FullLoader)
             cfg.update(yaml.load(f.read(), Loader=yaml.FullLoader))
