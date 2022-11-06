@@ -35,7 +35,7 @@ VOC_CLASSES = [k for k in VOC_TABLE.keys()]
 
 
 class VOCSegmentation(Dataset):
-    def __init__(self, root, image_set, crop_size, transform=None):
+    def __init__(self, root, image_set, crop_size, transform=None, random_crop=True):
         """
         VOC2012语义分割数据集
         :param root: (string) – Root directory of the VOC Dataset.
@@ -57,12 +57,13 @@ class VOCSegmentation(Dataset):
         image_dir = os.path.join(voc_root, "JPEGImages")
         self.images = [os.path.join(image_dir, x + ".jpg") for x in file_names]
         self.images = list(map(cv2_read_image, self.images))
-        self.images = self._filter(self.images)
 
         target_dir = os.path.join(voc_root, "SegmentationClass")
         self.targets = [os.path.join(target_dir, x + ".png") for x in file_names]
         self.targets = list(map(cv2_read_image, self.targets))
-        self.targets = self._filter(self.targets)
+        if random_crop:
+            self.images = self._filter(self.images)
+            self.targets = self._filter(self.targets)
         assert len(self.images) == len(self.targets)
 
     def __len__(self):

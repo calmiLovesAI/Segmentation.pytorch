@@ -42,6 +42,18 @@ class ToTensor:
         return f"{self.__class__.__name__}()"
 
 
+class Resize:
+    def __init__(self, size):
+        self.size = size
+
+    def __call__(self, image, target):
+        target = F.resize(target.unsqueeze(dim=0), size=self.size)
+        return F.resize(image, size=self.size), torch.squeeze(target, dim=0)
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(size={self.size})"
+
+
 class RGB2idx:
     def __init__(self, colormap2label):
         self.colormap2label = colormap2label

@@ -1,7 +1,7 @@
 import torch
 from torch.utils.data import DataLoader
 
-from datasets.transform import ToTensor, RGB2idx, Compose, RandomCrop
+from datasets.transform import ToTensor, RGB2idx, Compose, RandomCrop, Resize
 from datasets.voc import VOCSegmentation, VOC_COLORMAP
 
 
@@ -21,17 +21,27 @@ def get_voc_dataloader(cfg, is_train=True):
     batch_size = cfg["Train"]["batch_size"]
     root = cfg["Dataset"]["root"]
     crop_size = cfg["Train"]["input_size"][1:]
-    image_set = "train" if is_train else "val"
-    shuffle = True if is_train else False
     voc_colormap2label = colormap2label(VOC_COLORMAP)
-    dataset = VOCSegmentation(root=root,
-                              image_set=image_set,
-                              crop_size=crop_size,
-                              transform=Compose([
-                                  ToTensor(),
-                                  RGB2idx(voc_colormap2label),
-                                  RandomCrop(*crop_size),
-                              ]))
-    print(f"Loading {image_set} dataset with {len(dataset)} samples")
-    dataloader = DataLoader(dataset, batch_size=batch_size, shuffle=shuffle)
-    return dataloader
+    if is_train:
+        dataset = VOCSegmentation(root=root,
+                                  image_set="train",
+                                  crop_size=crop_size,
+                                  transform=Compose([
+                                      ToTensor(),
+                                      RGB2idx(voc_colormap2label),
+                                      RandomCrop(*crop_size),
+                                  ]))
+        print(f"Loading train dataset with {len(dataset)} samples")
+        return DataLoader(dataset, batch_size=batch_size, shuffle=True)
+    else:
+        dataset = VOCSegmentation(root=root,
+                                  image_set="val",
+                                  crop_size=crop_size,
+                                  transform=Compose([
+                                      ToTensor(),
+                                      RGB2idx(voc_colormap2label),
+                                      Resize(size=crop_size)
+                                  ]),
+                                  random_crop=False)
+        print(f"Loading val dataset with {len(dataset)} samples")
+        return DataLoader(dataset, batch_size=batch_size, shuffle=False)
