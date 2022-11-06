@@ -22,14 +22,14 @@ python train.py --cfg experiments/unet_voc.yaml
 ```
 
 ### 1.3 Evaluate
-+ Evaluate on PASCAL VOC2012 val set
++ Evaluate on PASCAL VOC2012 val set (UNet for example)
 ```commandline
 python train.py --cfg experiments/unet_voc.yaml --mode valid --ckpt outputs/UNet_VOC_weights.pth
 ```
 
 
 ### 1.4 Test
-+ Test on single image or several images
++ Test on single image or several images (UNet for example)
 ```commandline
 python test.py --cfg experiments/unet_voc.yaml --ckpt outputs/UNet_VOC_weights.pth
 ```
