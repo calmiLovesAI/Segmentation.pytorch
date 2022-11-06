@@ -4,6 +4,7 @@ import torch
 from tqdm import tqdm
 
 from core.loss import cross_entropy
+from core.miou import MeanIoU
 from utils.tools import MeanMetric
 
 
@@ -33,6 +34,7 @@ def train_loop(cfg, model, train_dataloader, valid_dataloader):
 
     for epoch in range(start_epoch, epochs):
         model.train()
+        loss_mean.reset()
         with tqdm(train_dataloader, desc=f"Epoch-{epoch}/{epochs}") as pbar:
             for i, (images, targets) in enumerate(pbar):
                 images = images.to(device)
@@ -49,9 +51,7 @@ def train_loop(cfg, model, train_dataloader, valid_dataloader):
                     "loss": f"{loss_mean.result()}",
                 })
 
-        loss_mean.reset()
-
-        evaluate_loop(model, valid_dataloader, device)
+        evaluate_loop(cfg, model, valid_dataloader)
 
         if epoch % save_frequency == 0:
             torch.save(model.state_dict(),
@@ -62,18 +62,12 @@ def train_loop(cfg, model, train_dataloader, valid_dataloader):
     torch.save(model, Path(save_path).joinpath(f"FCN_{dataset_name}_entire_model.pth"))
 
 
-def calculate_correct_pixel(pred: torch.Tensor, target: torch.Tensor):
-    x = torch.argmax(pred, dim=1)
-    # filter out background pixels
-    x = torch.where(x > 0, x, -1)
-    return (x == target).type(torch.float).sum().item()
-
-
-def evaluate_loop(model, dataloader, device):
+def evaluate_loop(cfg, model, dataloader):
+    device = cfg["device"]
     model.eval()
     test_loss = 0.0
-    num_correct_pixels = 0
-    num_pixels = 0
+
+    meanIoU = MeanIoU(num_classes=cfg["Dataset"]["num_classes"])
     num_batches = len(dataloader)
     with torch.no_grad():
         for i, (images, targets) in enumerate(dataloader):
@@ -82,8 +76,9 @@ def evaluate_loop(model, dataloader, device):
             targets = targets.to(device)
             pred = model(images)
             test_loss += cross_entropy(pred, targets).item()
-            num_correct_pixels += calculate_correct_pixel(pred, targets)
-            num_pixels += (targets > 0).type(torch.float).sum().item()
+            pred = torch.argmax(pred, dim=1)
+            meanIoU.add_batch(predictions=pred.cpu().numpy(), gts=targets.cpu().numpy())
+
     test_loss /= num_batches
-    acc = num_correct_pixels / num_pixels
-    print(f"\nEvaluate: Loss: {test_loss:8f}, Accuracy: {(100 * acc):0.2f}%")
+    _, _, _, mIoU, _ = meanIoU.__call__()
+    print(f"\nEvaluate: Loss: {test_loss:8f}, mIoU: {(mIoU * 100):0.2f}%")

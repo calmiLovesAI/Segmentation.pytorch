@@ -27,7 +27,7 @@ def main():
         train_loop(cfg, model, train_dataloader, valid_dataloader)
     if args.mode == "valid":
         model.load_state_dict(torch.load(args.ckpt, map_location=device))
-        evaluate_loop(model, valid_dataloader, device)
+        evaluate_loop(cfg, model, valid_dataloader)
 
 
 if __name__ == '__main__':
