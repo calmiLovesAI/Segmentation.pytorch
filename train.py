@@ -1,7 +1,7 @@
 import torch
 import argparse
 
-from core.fcn_train import train_loop, evaluate_loop
+from core.train_base import train_loop, evaluate_loop
 from core.parse import update_cfg
 from utils.tools import load_yaml
 

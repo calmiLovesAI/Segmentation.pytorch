@@ -13,6 +13,7 @@ def train_loop(cfg, model, train_dataloader, valid_dataloader):
     for k, v in cfg["Train"].items():
         print(f"{k} : {v}")
     device = cfg["device"]
+    model_name = cfg["Model"]["name"]
     dataset_name = cfg["Dataset"]["name"]
     start_epoch = cfg["Train"]["start_epoch"]
     epochs = cfg["Train"]["epochs"]
@@ -55,11 +56,11 @@ def train_loop(cfg, model, train_dataloader, valid_dataloader):
 
         if epoch % save_frequency == 0:
             torch.save(model.state_dict(),
-                       Path(save_path).joinpath(f"FCN_{dataset_name}_epoch-{epoch}.pth"))
+                       Path(save_path).joinpath(f"{model_name}_{dataset_name}_epoch-{epoch}.pth"))
 
     torch.save(model.state_dict(),
-               Path(save_path).joinpath(f"FCN_{dataset_name}_weights.pth"))
-    torch.save(model, Path(save_path).joinpath(f"FCN_{dataset_name}_entire_model.pth"))
+               Path(save_path).joinpath(f"{model_name}_{dataset_name}_weights.pth"))
+    torch.save(model, Path(save_path).joinpath(f"{model_name}_{dataset_name}_entire_model.pth"))
 
 
 def evaluate_loop(cfg, model, dataloader):
