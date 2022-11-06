@@ -1,6 +1,7 @@
 from pathlib import Path
 
 import torch
+from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
 from core.loss import cross_entropy
@@ -15,12 +16,15 @@ def train_loop(cfg, model, train_dataloader, valid_dataloader):
     device = cfg["device"]
     model_name = cfg["Model"]["name"]
     dataset_name = cfg["Dataset"]["name"]
+
     start_epoch = cfg["Train"]["start_epoch"]
     epochs = cfg["Train"]["epochs"]
     save_frequency = cfg["Train"]["save_frequency"]
     save_path = cfg["Train"]["save_path"]
     load_weights = cfg["Train"]["load_weights"]
     tensorboard_on = cfg["Train"]["tensorboard_on"]
+    input_size = cfg["Train"]["input_size"]
+    batch_size = cfg["Train"]["batch_size"]
     initial_learning_rate = cfg["Train"]["learning_rate"]
 
     optimizer = torch.optim.SGD(params=model.parameters(), lr=initial_learning_rate, momentum=0.9, weight_decay=0.001)
@@ -32,6 +36,11 @@ def train_loop(cfg, model, train_dataloader, valid_dataloader):
         model.load_state_dict(torch.load(load_weights, map_location=device))
     else:
         start_epoch = 0
+
+    if tensorboard_on:
+        # 在控制台使用命令 tensorboard --logdir=runs 进入tensorboard面板
+        writer = SummaryWriter()
+        writer.add_graph(model, torch.randn(batch_size, *input_size, dtype=torch.float32, device=device))
 
     for epoch in range(start_epoch, epochs):
         model.train()
@@ -48,6 +57,10 @@ def train_loop(cfg, model, train_dataloader, valid_dataloader):
                 optimizer.step()
                 loss_mean.update(loss.item())
 
+                if tensorboard_on:
+                    writer.add_scalar(tag="Loss", scalar_value=loss_mean.result(),
+                                      global_step=epoch * len(train_dataloader) + i)
+
                 pbar.set_postfix({
                     "loss": f"{loss_mean.result()}",
                 })
@@ -57,6 +70,8 @@ def train_loop(cfg, model, train_dataloader, valid_dataloader):
         if epoch % save_frequency == 0:
             torch.save(model.state_dict(),
                        Path(save_path).joinpath(f"{model_name}_{dataset_name}_epoch-{epoch}.pth"))
+    if tensorboard_on:
+        writer.close()
 
     torch.save(model.state_dict(),
                Path(save_path).joinpath(f"{model_name}_{dataset_name}_weights.pth"))
