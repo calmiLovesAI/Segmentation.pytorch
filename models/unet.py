@@ -20,7 +20,6 @@ class UNet(nn.Module):
             self.backbone = vgg16_bn(weights=None)
         del self.backbone.classifier
         del self.backbone.avgpool
-        print(self.backbone)
 
         self.up4 = Up(in_channels[3], out_channels[3])
         self.up3 = Up(in_channels[2], out_channels[2])
