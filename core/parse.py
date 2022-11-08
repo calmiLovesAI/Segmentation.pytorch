@@ -7,13 +7,14 @@ from models.unet import UNet
 
 def update_cfg(cfg: dict, opts, device, use_dataset=True) -> dict:
     cfg.update({"device": device})
-    # update some training hyperparameters
-    cfg["Train"]["batch_size"] = opts.batch_size
-    cfg["Train"]["start_epoch"] = opts.start_epoch
-    cfg["Train"]["epochs"] = opts.epochs
-    cfg["Train"]["learning_rate"] = opts.lr
-    cfg["Train"]["save_frequency"] = opts.save_freq
-    cfg["Train"]["tensorboard_on"] = opts.tensorboard
+    if opts is not None:
+        # update some training hyperparameters
+        cfg["Train"]["batch_size"] = opts.batch_size
+        cfg["Train"]["start_epoch"] = opts.start_epoch
+        cfg["Train"]["epochs"] = opts.epochs
+        cfg["Train"]["learning_rate"] = opts.lr
+        cfg["Train"]["save_frequency"] = opts.save_freq
+        cfg["Train"]["tensorboard_on"] = opts.tensorboard
     if cfg["Model"]["name"] == "FCN":
         fcn = FCN(num_classes=cfg["Dataset"]["num_classes"] + 1)
         cfg.update({"model": fcn})

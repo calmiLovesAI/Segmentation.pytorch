@@ -97,4 +97,4 @@ def evaluate_loop(cfg, model, dataloader):
 
     test_loss /= num_batches
     _, _, _, mIoU, _ = meanIoU.__call__()
-    print(f"\nEvaluate: Loss: {test_loss:8f}, mIoU: {(mIoU * 100):0.2f}%")
+    print(f"\nEvaluate: Loss: {test_loss:8f}, mIoU: {(mIoU * 100):0.2f}")

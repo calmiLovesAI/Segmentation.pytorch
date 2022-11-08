@@ -20,7 +20,7 @@ def main():
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     cfg = load_yaml(filepath=[args.cfg])
-    cfg = update_cfg(cfg, device, use_dataset=False)
+    cfg = update_cfg(cfg, None, device, use_dataset=False)
 
     model = cfg["model"]
     model.to(device=device)
