@@ -3,6 +3,7 @@
 from datasets.dataloader import get_voc_dataloader
 from models.fcn import FCN
 from models.unet import UNet
+from models.deeplab.deeplabv3plus import DeeplabV3Plus
 
 
 def get_model(cfg: dict, model_name: str):
@@ -15,6 +16,11 @@ def get_model(cfg: dict, model_name: str):
                         in_channels=model_cfg["Up"]["in_channels"],
                         out_channels=model_cfg["Up"]["out_channels"],
                         pretrained=model_cfg["backbone"]["pretrained"])
+        case "DeeplabV3+":
+            return DeeplabV3Plus(num_classes=cfg["Dataset"]["num_classes"] + 1,
+                                 output_stride=cfg["Model"]["output_stride"],
+                                 freeze_bn=cfg["Model"]["freeze_bn"],
+                                 backbone_pretrained=cfg["backbone"]["pretrained"])
 
 
 def get_dataset(cfg: dict, dataset_name: str):
