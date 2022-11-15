@@ -1,0 +1,28 @@
+Model:
+  name: "DeeplabV3+"
+  backbone:
+    name: "resnet101"
+    pretrained: true
+Dataset:
+  root: "data"
+  name: "VOC"
+  num_classes: 20
+Train:
+  start_epoch: 0
+  epochs: 100
+  batch_size: 8
+  input_size:
+    - 3
+    - 320
+    - 480
+  learning_rate: 0.001
+  load_weights: ""
+  save_frequency: 10
+  save_path: "outputs"
+  tensorboard_on: true
+Test:
+  test_results: "results"
+  test_pictures:
+    - "outputs/2007_000032.jpg"
+    - "outputs/2007_000033.jpg"
+    - "outputs/2007_000241.jpg"
