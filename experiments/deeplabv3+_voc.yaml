@@ -14,8 +14,8 @@ Train:
   batch_size: 8
   input_size:
     - 3
-    - 512
-    - 512
+    - 320
+    - 480
   learning_rate: 0.001
   load_weights: ""
   save_frequency: 10
