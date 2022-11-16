@@ -19,7 +19,6 @@ def get_model(cfg: dict, model_name: str):
         case "DeeplabV3+":
             return DeeplabV3Plus(num_classes=cfg["Dataset"]["num_classes"] + 1,
                                  output_stride=cfg["Model"]["output_stride"],
-                                 freeze_bn=cfg["Model"]["freeze_bn"],
                                  backbone_pretrained=cfg["backbone"]["pretrained"])
 
 

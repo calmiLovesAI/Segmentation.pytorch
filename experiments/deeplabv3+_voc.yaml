@@ -4,7 +4,6 @@ Model:
     name: "resnet101"
     pretrained: true
   output_stride: 16
-  freeze_bn: false
 Dataset:
   root: "data"
   name: "VOC"
