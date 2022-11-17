@@ -35,16 +35,14 @@ VOC_CLASSES = [k for k in VOC_TABLE.keys()]
 
 
 class VOCSegmentation(Dataset):
-    def __init__(self, root, image_set, crop_size, transform=None, random_crop=True):
+    def __init__(self, root, image_set, transform=None):
         """
         VOC2012语义分割数据集
         :param root: (string) – Root directory of the VOC Dataset.
         :param image_set: (string, optional) – Select the image_set to use, "train", "trainval" or "val". If year=="2007", can also be "test".
-        :param crop_size: (tuple) - 随机剪裁后的图片大小
         :param transform:
         """
         super(VOCSegmentation, self).__init__()
-        self.crop_size = crop_size
         self.transform = transform
 
         voc_root = os.path.join(root, "VOCdevkit", "VOC2012")
@@ -61,18 +59,10 @@ class VOCSegmentation(Dataset):
         target_dir = os.path.join(voc_root, "SegmentationClass")
         self.targets = [os.path.join(target_dir, x + ".png") for x in file_names]
         self.targets = list(map(cv2_read_image, self.targets))
-        if random_crop:
-            self.images = self._filter(self.images)
-            self.targets = self._filter(self.targets)
         assert len(self.images) == len(self.targets)
 
     def __len__(self):
         return len(self.images)
-
-    def _filter(self, imgs):
-        return [
-            img for img in imgs if (img.shape[0] >= self.crop_size[0] and img.shape[1] >= self.crop_size[1])
-        ]
 
     def __getitem__(self, item):
         img = self.images[item]

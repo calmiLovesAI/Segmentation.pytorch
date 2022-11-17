@@ -1,3 +1,5 @@
+from typing import List
+
 import torch
 from torch.utils.data import DataLoader
 
@@ -20,15 +22,19 @@ def colormap2label(colormap):
 def get_voc_dataloader(cfg, is_train=True):
     batch_size = cfg["Train"]["batch_size"]
     root = cfg["Dataset"]["root"]
-    crop_size = cfg["Train"]["input_size"][1:]
+    base_size = cfg["Train"]["input_size"][1:]
+    if isinstance(base_size, List):
+        base_size = max(base_size)
+        assert isinstance(base_size, int)
+    crop_size = cfg["Train"]["crop_size"]
     voc_colormap2label = colormap2label(VOC_COLORMAP)
     if is_train:
         dataset = VOCSegmentation(root=root,
                                   image_set="train",
-                                  crop_size=crop_size,
                                   transform=Compose([
                                       ToTensor(),
                                       RGB2idx(voc_colormap2label),
+                                      Resize(size=base_size),
                                       RandomCrop(*crop_size),
                                   ]))
         print(f"Loading train dataset with {len(dataset)} samples")
@@ -36,12 +42,10 @@ def get_voc_dataloader(cfg, is_train=True):
     else:
         dataset = VOCSegmentation(root=root,
                                   image_set="val",
-                                  crop_size=crop_size,
                                   transform=Compose([
                                       ToTensor(),
                                       RGB2idx(voc_colormap2label),
                                       Resize(size=crop_size)
-                                  ]),
-                                  random_crop=False)
+                                  ]))
         print(f"Loading val dataset with {len(dataset)} samples")
         return DataLoader(dataset, batch_size=batch_size, shuffle=False)
