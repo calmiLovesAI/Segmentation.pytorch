@@ -9,15 +9,15 @@ from models.deeplab.deeplabv3plus import DeeplabV3Plus
 def get_model(cfg: dict, model_name: str):
     match model_name:
         case "FCN":
-            return FCN(num_classes=cfg["Dataset"]["num_classes"] + 1)
+            return FCN(num_classes=cfg["Dataset"]["num_classes"])
         case "UNet":
             model_cfg = cfg["Model"]
-            return UNet(num_classes=cfg["Dataset"]["num_classes"] + 1,
+            return UNet(num_classes=cfg["Dataset"]["num_classes"],
                         in_channels=model_cfg["Up"]["in_channels"],
                         out_channels=model_cfg["Up"]["out_channels"],
                         pretrained=model_cfg["backbone"]["pretrained"])
         case "DeeplabV3+":
-            return DeeplabV3Plus(num_classes=cfg["Dataset"]["num_classes"] + 1,
+            return DeeplabV3Plus(num_classes=cfg["Dataset"]["num_classes"],
                                  output_stride=cfg["Model"]["output_stride"],
                                  pretrained_backbone=cfg["Model"]["backbone"]["pretrained"])
 
@@ -38,6 +38,7 @@ def update_hyperparams(cfg: dict, opts):
     cfg["Train"]["learning_rate"] = opts.lr
     cfg["Train"]["save_frequency"] = opts.save_freq
     cfg["Train"]["tensorboard_on"] = opts.tensorboard
+    cfg["Dataset"]["num_classes"] += 1
 
 
 def update_cfg(cfg: dict, opts, device, use_dataset=True) -> dict:
