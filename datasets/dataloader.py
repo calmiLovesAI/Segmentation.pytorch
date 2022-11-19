@@ -45,7 +45,7 @@ def get_voc_dataloader(cfg, is_train=True):
                                   transform=Compose([
                                       ToTensor(),
                                       RGB2idx(voc_colormap2label),
-                                      Resize(size=crop_size)
+                                      Resize(size=[crop_size, crop_size])
                                   ]))
         print(f"Loading val dataset with {len(dataset)} samples")
         return DataLoader(dataset, batch_size=batch_size, shuffle=False)
