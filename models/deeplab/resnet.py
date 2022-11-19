@@ -1,13 +1,13 @@
 import torch
 import torch.nn as nn
 from torch.hub import load_state_dict_from_url
-from torch.utils import model_zoo
 from typing import Callable, List, Optional, Type, Union
 from torch import Tensor
-
+from torchvision.models import ResNet50_Weights, ResNet101_Weights
 
 model_urls = {
-    'resnet101': "https://download.pytorch.org/models/resnet101-63fe2227.pth"
+    'resnet50': ResNet50_Weights.IMAGENET1K_V2.url,
+    'resnet101': ResNet101_Weights.IMAGENET1K_V2.url,
 }
 
 
@@ -236,16 +236,6 @@ class ResNet(nn.Module):
 
         return nn.Sequential(*layers)
 
-    def _load_pretrained_weights(self):
-        pretrain_dict = model_zoo.load_url("https://download.pytorch.org/models/resnet101-63fe2227.pth")
-        model_dict = {}
-        state_dict = self.state_dict()
-        for k, v in pretrain_dict.items():
-            if k in state_dict:
-                model_dict[k] = v
-        state_dict.update(model_dict)
-        self.load_state_dict(state_dict)
-
     def _forward_impl(self, x: Tensor):
         x = self.conv1(x)
         x = self.bn1(x)
@@ -277,6 +267,10 @@ def _resnet(arch, block, layers, replace_stride_with_dilation, pretrained):
         model.load_state_dict(state_dict)
         print(f"Using pretrained weights from {model_urls[arch]}")
     return model
+
+
+def resnet50(replace_stride_with_dilation, pretrained=False):
+    return _resnet('resnet50', Bottleneck, [3, 4, 6, 3], replace_stride_with_dilation, pretrained)
 
 
 def resnet101(replace_stride_with_dilation, pretrained=False):
