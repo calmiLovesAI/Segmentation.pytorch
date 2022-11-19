@@ -1,8 +1,14 @@
 import torch
 import torch.nn as nn
+from torch.hub import load_state_dict_from_url
 from torch.utils import model_zoo
 from typing import Callable, List, Optional, Type, Union
 from torch import Tensor
+
+
+model_urls = {
+    'resnet101': "https://download.pytorch.org/models/resnet101-63fe2227.pth"
+}
 
 
 def conv3x3(in_planes: int, out_planes: int, stride: int = 1, groups: int = 1, dilation: int = 1) -> nn.Conv2d:
@@ -135,11 +141,12 @@ class ResNet(nn.Module):
     def __init__(self,
                  block: Type[Union[BasicBlock, Bottleneck]],
                  layers: List[int],
-                 output_stride,
+                 num_classes: int = 1000,
+                 zero_init_residual: bool = False,
                  groups: int = 1,
                  width_per_group: int = 64,
+                 replace_stride_with_dilation: Optional[List[bool]] = None,
                  norm_layer: Optional[Callable[..., nn.Module]] = None,
-                 pretrained=False,
                  ):
         super(ResNet, self).__init__()
         if norm_layer is None:
@@ -147,14 +154,16 @@ class ResNet(nn.Module):
         self._norm_layer = norm_layer
 
         self.inplanes = 64
-        if output_stride == 16:
-            strides = [1, 2, 2, 1]
-            dilations = [1, 1, 1, 2]
-        elif output_stride == 8:
-            strides = [1, 2, 1, 1]
-            dilations = [1, 1, 2, 4]
-        else:
-            raise NotImplementedError
+        self.dilation = 1
+        if replace_stride_with_dilation is None:
+            # each element in the tuple indicates if we should replace
+            # the 2x2 stride with a dilated convolution instead
+            replace_stride_with_dilation = [False, False, False]
+        if len(replace_stride_with_dilation) != 3:
+            raise ValueError(
+                "replace_stride_with_dilation should be None "
+                f"or a 3-element tuple, got {replace_stride_with_dilation}"
+            )
 
         self.groups = groups
         self.base_width = width_per_group
@@ -163,24 +172,42 @@ class ResNet(nn.Module):
         self.relu = nn.ReLU(inplace=True)
         self.maxpool = nn.MaxPool2d(kernel_size=3, stride=2, padding=1)
 
-        self.layer1 = self._make_layer_1(block, 64, layers[0], stride=strides[0], dilate=dilations[0])
-        self.layer2 = self._make_layer_1(block, 128, layers[1], stride=strides[1], dilate=dilations[1])
-        self.layer3 = self._make_layer_1(block, 256, layers[2], stride=strides[2], dilate=dilations[2])
-        self.layer4 = self._make_layer_2(block, 512, [1, 2, 4], stride=strides[3], dilate=dilations[3])
+        self.layer1 = self._make_layer(block, 64, layers[0])
+        self.layer2 = self._make_layer(block, 128, layers[1], stride=2, dilate=replace_stride_with_dilation[0])
+        self.layer3 = self._make_layer(block, 256, layers[2], stride=2, dilate=replace_stride_with_dilation[1])
+        self.layer4 = self._make_layer(block, 512, layers[3], stride=2, dilate=replace_stride_with_dilation[2])
 
-        if pretrained:
-            self._load_pretrained_weights()
+        for m in self.modules():
+            if isinstance(m, nn.Conv2d):
+                nn.init.kaiming_normal_(m.weight, mode='fan_out', nonlinearity='relu')
+            elif isinstance(m, (nn.BatchNorm2d, nn.GroupNorm)):
+                nn.init.constant_(m.weight, 1)
+                nn.init.constant_(m.bias, 0)
 
-    def _make_layer_1(
+        # Zero-initialize the last BN in each residual branch,
+        # so that the residual branch starts with zeros, and each residual block behaves like an identity.
+        # This improves the model by 0.2~0.3% according to https://arxiv.org/abs/1706.02677
+        if zero_init_residual:
+            for m in self.modules():
+                if isinstance(m, Bottleneck):
+                    nn.init.constant_(m.bn3.weight, 0)
+                elif isinstance(m, BasicBlock):
+                    nn.init.constant_(m.bn2.weight, 0)
+
+    def _make_layer(
             self,
             block: Type[Union[BasicBlock, Bottleneck]],
             planes: int,
             blocks: int,
             stride: int = 1,
-            dilate: int = 1,
+            dilate: bool = False,
     ) -> nn.Sequential:
         norm_layer = self._norm_layer
         downsample = None
+        previous_dilation = self.dilation
+        if dilate:
+            self.dilation *= stride
+            stride = 1
         if stride != 1 or self.inplanes != planes * block.expansion:
             downsample = nn.Sequential(
                 conv1x1(self.inplanes, planes * block.expansion, stride),
@@ -190,8 +217,9 @@ class ResNet(nn.Module):
         layers = []
         layers.append(
             block(
-                self.inplanes, planes, stride, downsample, self.groups, self.base_width, dilate, norm_layer
+                self.inplanes, planes, stride, downsample, self.groups, self.base_width, previous_dilation, norm_layer
             )
+
         )
         self.inplanes = planes * block.expansion
         for _ in range(1, blocks):
@@ -201,43 +229,7 @@ class ResNet(nn.Module):
                     planes,
                     groups=self.groups,
                     base_width=self.base_width,
-                    dilation=dilate,
-                    norm_layer=norm_layer,
-                )
-            )
-
-        return nn.Sequential(*layers)
-
-    def _make_layer_2(self,
-                      block: Type[Union[BasicBlock, Bottleneck]],
-                      planes: int,
-                      dilation_factors: List[int],
-                      stride: int = 1,
-                      dilate: int = 1
-                      ) -> nn.Sequential:
-        norm_layer = self._norm_layer
-        downsample = None
-        if stride != 1 or self.inplanes != planes * block.expansion:
-            downsample = nn.Sequential(
-                conv1x1(self.inplanes, planes * block.expansion, stride),
-                norm_layer(planes * block.expansion),
-            )
-
-        layers = []
-        layers.append(
-            block(
-                self.inplanes, planes, stride, downsample, self.groups, self.base_width, dilate * dilation_factors[0], norm_layer
-            )
-        )
-        self.inplanes = planes * block.expansion
-        for i in range(1, len(dilation_factors)):
-            layers.append(
-                block(
-                    self.inplanes,
-                    planes,
-                    groups=self.groups,
-                    base_width=self.base_width,
-                    dilation=dilate * dilation_factors[i],
+                    dilation=self.dilation,
                     norm_layer=norm_layer,
                 )
             )
@@ -272,5 +264,20 @@ class ResNet(nn.Module):
         return self._forward_impl(x)
 
 
-def resnet101(output_stride, pretrained=False):
-    return ResNet(Bottleneck, [3, 4, 23, 3], output_stride, pretrained=pretrained)
+def _resnet(arch, block, layers, replace_stride_with_dilation, pretrained):
+    model = ResNet(block=block, layers=layers, replace_stride_with_dilation=replace_stride_with_dilation)
+    if pretrained:
+        pretrain_dict = load_state_dict_from_url(url=model_urls[arch])
+        model_dict = {}
+        state_dict = model.state_dict()
+        for k, v in pretrain_dict.items():
+            if k in state_dict:
+                model_dict[k] = v
+        state_dict.update(model_dict)
+        model.load_state_dict(state_dict)
+        print(f"Using pretrained weights from {model_urls[arch]}")
+    return model
+
+
+def resnet101(replace_stride_with_dilation, pretrained=False):
+    return _resnet('resnet101', Bottleneck, [3, 4, 23, 3], replace_stride_with_dilation, pretrained)

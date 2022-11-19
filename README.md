@@ -40,4 +40,4 @@ python test.py --cfg experiments/unet_voc.yaml --ckpt outputs/UNet_VOC_weights.p
 ## 3. Deployment
 
 ## Acknowledgments
-+ https://github.com/jfzhang95/pytorch-deeplab-xception
++ https://github.com/VainF/DeepLabV3Plus-Pytorch
