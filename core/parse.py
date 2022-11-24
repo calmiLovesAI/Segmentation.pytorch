@@ -33,7 +33,6 @@ def get_dataset(cfg: dict, dataset_name: str):
 
 def update_hyperparams(cfg: dict, opts):
     cfg["Train"]["batch_size"] = opts.batch_size
-    cfg["Train"]["start_epoch"] = opts.start_epoch
     cfg["Train"]["epochs"] = opts.epochs
     cfg["Train"]["learning_rate"] = opts.lr
     cfg["Train"]["step_size"] = opts.step_size

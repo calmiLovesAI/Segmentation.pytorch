@@ -12,7 +12,6 @@ def main():
     parser.add_argument('--mode', type=str, default='train', help='train mode or valid mode')
     parser.add_argument('--ckpt', type=str, default='', help='model checkpoint path')
     parser.add_argument('--batch_size', type=int, default=8)
-    parser.add_argument('--start_epoch', type=int, default=0)
     parser.add_argument('--epochs', type=int, default=100)
     parser.add_argument('--lr', type=float, default=0.001)
     parser.add_argument('--step_size', type=int, default=30)

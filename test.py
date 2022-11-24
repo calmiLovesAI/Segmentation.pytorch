@@ -25,7 +25,7 @@ def main():
 
     model = cfg["model"]
     model.to(device=device)
-    model.load_state_dict(torch.load(args.ckpt, map_location=device))
+    model.load_state_dict(torch.load(args.ckpt, map_location=device)["model_state"])
 
     test_images = cfg["Test"]["test_pictures"]
     for img in test_images:

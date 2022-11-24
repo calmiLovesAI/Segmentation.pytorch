@@ -1,4 +1,5 @@
 import cv2
+import torch
 import yaml
 from typing import List
 
@@ -37,7 +38,22 @@ def cv2_read_image(image_path):
 
 
 class Saver:
-    def __init__(self):
-        pass
+    def __init__(self, model, optimizer, scheduler):
+        self.best_score = 0.0
+        self.model = model
+        self.optimizer = optimizer
+        self.scheduler = scheduler
+
+    def save_ckpt(self, epoch, filename, score):
+        if score > self.best_score:
+            # save current model
+            torch.save(obj={
+                "current_epoch": epoch,
+                "model_state": self.model.state_dict(),
+                "optimizer_state": self.optimizer.state_dict(),
+                "scheduler_state": self.scheduler.state_dict(),
+                "best_score": score,
+            }, f=filename)
+            self.best_score = score
 
 

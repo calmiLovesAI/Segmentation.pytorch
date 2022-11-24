@@ -5,7 +5,6 @@ Dataset:
   name: "VOC"
   num_classes: 20
 Train:
-  start_epoch: 0
   epochs: 100
   batch_size: 8
   # 输入图片大小：(C, H, W)

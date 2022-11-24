@@ -7,7 +7,7 @@ from tqdm import tqdm
 from core.loss import cross_entropy
 from core.miou import MeanIoU
 from core.optimizer import get_optimizer, get_lr_scheduler
-from utils.tools import MeanMetric
+from utils.tools import MeanMetric, Saver
 
 
 def train_loop(cfg, model, train_dataloader, valid_dataloader):
@@ -18,11 +18,10 @@ def train_loop(cfg, model, train_dataloader, valid_dataloader):
     model_name = cfg["Model"]["name"]
     dataset_name = cfg["Dataset"]["name"]
 
-    start_epoch = cfg["Train"]["start_epoch"]
     epochs = cfg["Train"]["epochs"]
     save_frequency = cfg["Train"]["save_frequency"]
     save_path = cfg["Train"]["save_path"]
-    load_weights = cfg["Train"]["load_weights"]
+    ckpt_file = cfg["Train"]["load_weights"]
     tensorboard_on = cfg["Train"]["tensorboard_on"]
     input_size = cfg["Train"]["input_size"]
     batch_size = cfg["Train"]["batch_size"]
@@ -33,10 +32,15 @@ def train_loop(cfg, model, train_dataloader, valid_dataloader):
     scheduler = get_lr_scheduler(optimizer, step_size=step_size)
 
     loss_mean = MeanMetric()
+    saver = Saver(model, optimizer, scheduler)
 
-    if load_weights != "":
-        print(f"Successfully loaded weights file: {load_weights}!")
-        model.load_state_dict(torch.load(load_weights, map_location=device))
+    if ckpt_file != "":
+        ckpt = torch.load(ckpt_file, map_location=device)
+        model.load_state_dict(ckpt["model_state"])
+        optimizer.load_state_dict(ckpt["optimizer_state"])
+        scheduler.load_state_dict(ckpt["scheduler_state"])
+        start_epoch = ckpt["current_epoch"] + 1
+        print(f"Successfully loaded checkpoint: {ckpt_file}!")
     else:
         start_epoch = 0
 
@@ -69,17 +73,18 @@ def train_loop(cfg, model, train_dataloader, valid_dataloader):
                 })
         scheduler.step()
 
-        evaluate_loop(cfg, model, valid_dataloader)
+        score = evaluate_loop(cfg, model, valid_dataloader)
 
         if epoch % save_frequency == 0:
-            torch.save(model.state_dict(),
-                       Path(save_path).joinpath(f"{model_name}_{dataset_name}_epoch-{epoch}.pth"))
+            saver.save_ckpt(epoch=epoch, filename=Path(save_path).joinpath(f"{model_name}_{dataset_name}_score={score}.pth"),
+                            score=score)
+
+    saver.save_ckpt(epoch=epochs-1, filename=Path(save_path).joinpath(f"{model_name}_{dataset_name}_score={score}.pth"),
+                    score=score)
+    torch.save(model.state_dict(), Path(save_path).joinpath(f"{model_name}_{dataset_name}_weights.pth"))
+
     if tensorboard_on:
         writer.close()
-
-    torch.save(model.state_dict(),
-               Path(save_path).joinpath(f"{model_name}_{dataset_name}_weights.pth"))
-    torch.save(model, Path(save_path).joinpath(f"{model_name}_{dataset_name}_entire_model.pth"))
 
 
 def evaluate_loop(cfg, model, dataloader):
@@ -102,3 +107,4 @@ def evaluate_loop(cfg, model, dataloader):
     test_loss /= num_batches
     _, _, _, mIoU, _ = meanIoU.__call__()
     print(f"\nEvaluate: Loss: {test_loss:8f}, mIoU: {(mIoU * 100):0.2f}")
+    return mIoU * 100
