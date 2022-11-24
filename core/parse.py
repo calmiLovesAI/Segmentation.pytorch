@@ -36,6 +36,7 @@ def update_hyperparams(cfg: dict, opts):
     cfg["Train"]["start_epoch"] = opts.start_epoch
     cfg["Train"]["epochs"] = opts.epochs
     cfg["Train"]["learning_rate"] = opts.lr
+    cfg["Train"]["step_size"] = opts.step_size
     cfg["Train"]["save_frequency"] = opts.save_freq
     cfg["Train"]["tensorboard_on"] = opts.tensorboard
 

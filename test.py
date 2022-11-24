@@ -19,6 +19,7 @@ def main():
     args = parser.parse_args()
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print("Device: ", device)
     cfg = load_yaml(filepath=[args.cfg])
     cfg = update_cfg(cfg, None, device, use_dataset=False)
 

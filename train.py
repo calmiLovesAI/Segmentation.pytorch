@@ -14,12 +14,14 @@ def main():
     parser.add_argument('--batch_size', type=int, default=8)
     parser.add_argument('--start_epoch', type=int, default=0)
     parser.add_argument('--epochs', type=int, default=100)
-    parser.add_argument('--lr', type=float, default=0.0001)
+    parser.add_argument('--lr', type=float, default=0.001)
+    parser.add_argument('--step_size', type=int, default=30)
     parser.add_argument('--save_freq', type=int, default=10)
     parser.add_argument('--tensorboard', type=bool, default=True)
     opts = parser.parse_args()
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print("Device: ", device)
     cfg = load_yaml(filepath=[opts.cfg])
     cfg = update_cfg(cfg, opts, device)
 
