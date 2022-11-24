@@ -2,7 +2,7 @@ Model:
   name: "DeeplabV3Plus"
   backbone:
     name: "resnet101"
-    pretrained: true
+    pretrained: false
   output_stride: 16
 Dataset:
   root: "data"
