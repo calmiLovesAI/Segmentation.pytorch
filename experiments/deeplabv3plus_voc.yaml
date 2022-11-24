@@ -1,5 +1,5 @@
 Model:
-  name: "DeeplabV3+"
+  name: "DeeplabV3Plus"
   backbone:
     name: "resnet101"
     pretrained: true

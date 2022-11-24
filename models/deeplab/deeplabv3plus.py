@@ -92,6 +92,7 @@ class DeeplabV3Plus(nn.Module):
             nn.ReLU(inplace=True),
             nn.Conv2d(256, num_classes, 1)
         )
+        print(f"num_classes: {num_classes}")
         self._init_weight()
 
     def _init_weight(self):

@@ -16,7 +16,7 @@ def get_model(cfg: dict, model_name: str):
                         in_channels=model_cfg["Up"]["in_channels"],
                         out_channels=model_cfg["Up"]["out_channels"],
                         pretrained=model_cfg["backbone"]["pretrained"])
-        case "DeeplabV3+":
+        case "DeeplabV3Plus":
             return DeeplabV3Plus(num_classes=cfg["Dataset"]["num_classes"],
                                  output_stride=cfg["Model"]["output_stride"],
                                  pretrained_backbone=cfg["Model"]["backbone"]["pretrained"])
@@ -38,11 +38,11 @@ def update_hyperparams(cfg: dict, opts):
     cfg["Train"]["learning_rate"] = opts.lr
     cfg["Train"]["save_frequency"] = opts.save_freq
     cfg["Train"]["tensorboard_on"] = opts.tensorboard
-    cfg["Dataset"]["num_classes"] += 1
 
 
 def update_cfg(cfg: dict, opts, device, use_dataset=True) -> dict:
     cfg.update({"device": device})
+    cfg["Dataset"]["num_classes"] += 1
     if opts is not None:
         # update some training hyperparameters
         update_hyperparams(cfg, opts)
