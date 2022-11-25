@@ -5,7 +5,7 @@ from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
 from core.loss import cross_entropy
-from core.miou import MeanIoU
+from core.metrics import SegmentationMetrics
 from core.optimizer import get_optimizer, get_lr_scheduler
 from utils.tools import MeanMetric, Saver
 
@@ -41,6 +41,7 @@ def train_loop(cfg, model, train_dataloader, valid_dataloader):
         scheduler.load_state_dict(ckpt["scheduler_state"])
         start_epoch = ckpt["current_epoch"] + 1
         print(f"Successfully loaded checkpoint: {ckpt_file}!")
+        del ckpt  # free memory
     else:
         start_epoch = 0
 
@@ -74,12 +75,20 @@ def train_loop(cfg, model, train_dataloader, valid_dataloader):
         scheduler.step()
 
         score = evaluate_loop(cfg, model, valid_dataloader)
+        if tensorboard_on:
+            writer.add_scalar(tag="Overall Acc", scalar_value=score["Overall Acc"], global_step=epoch)
+            writer.add_scalar(tag="Mean Acc", scalar_value=score["Mean Acc"], global_step=epoch)
+            writer.add_scalar(tag="FreqW Acc", scalar_value=score["FreqW Acc"], global_step=epoch)
+            writer.add_scalar(tag="Mean IoU", scalar_value=score["Mean IoU"] * 100, global_step=epoch)
+            writer.add_scalar(tag="Class IoU", scalar_value=score["Class IoU"], global_step=epoch)
 
         if epoch % save_frequency == 0:
-            saver.save_ckpt(epoch=epoch, filename=Path(save_path).joinpath(f"{model_name}_{dataset_name}_score={score}.pth"),
+            saver.save_ckpt(epoch=epoch,
+                            filename=Path(save_path).joinpath(f"{model_name}_{dataset_name}_score={score}.pth"),
                             score=score)
 
-    saver.save_ckpt(epoch=epochs-1, filename=Path(save_path).joinpath(f"{model_name}_{dataset_name}_score={score}.pth"),
+    saver.save_ckpt(epoch=epochs - 1,
+                    filename=Path(save_path).joinpath(f"{model_name}_{dataset_name}_score={score}.pth"),
                     score=score)
     torch.save(model.state_dict(), Path(save_path).joinpath(f"{model_name}_{dataset_name}_weights.pth"))
 
@@ -92,7 +101,7 @@ def evaluate_loop(cfg, model, dataloader):
     model.eval()
     test_loss = 0.0
 
-    meanIoU = MeanIoU(num_classes=cfg["Dataset"]["num_classes"])
+    metrics = SegmentationMetrics(num_classes=cfg["Dataset"]["num_classes"])
     num_batches = len(dataloader)
     with torch.no_grad():
         for i, (images, targets) in enumerate(dataloader):
@@ -102,9 +111,9 @@ def evaluate_loop(cfg, model, dataloader):
             pred = model(images)
             test_loss += cross_entropy(pred, targets).item()
             pred = torch.argmax(pred, dim=1)
-            meanIoU.add_batch(predictions=pred.cpu().numpy(), gts=targets.cpu().numpy())
+            metrics.add_batch(predictions=pred.cpu().numpy(), gts=targets.cpu().numpy())
 
     test_loss /= num_batches
-    _, _, _, mIoU, _ = meanIoU.__call__()
-    print(f"\nEvaluate: Loss: {test_loss:8f}, mIoU: {(mIoU * 100):0.2f}")
-    return mIoU * 100
+    metric_results = metrics.get_results()
+    print(f"\nEvaluate: Loss: {test_loss:8f}, mIoU: {(metric_results['Mean IoU'] * 100):0.2f}")
+    return metric_results

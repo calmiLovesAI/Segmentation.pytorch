@@ -1,7 +1,7 @@
 import numpy as np
 
 
-class MeanIoU:
+class SegmentationMetrics:
     def __init__(self, num_classes):
         self.num_classes = num_classes
         self.hist = np.zeros((num_classes, num_classes))
@@ -17,7 +17,7 @@ class MeanIoU:
         for lp, lt in zip(predictions, gts):
             self.hist += self._fast_hist(lp.flatten(), lt.flatten())
 
-    def __call__(self):
+    def get_results(self):
         acc = np.diag(self.hist).sum() / self.hist.sum()
         acc_cls = np.diag(self.hist) / self.hist.sum(axis=1)
         acc_cls = np.nanmean(acc_cls)
@@ -25,4 +25,11 @@ class MeanIoU:
         mean_iu = np.nanmean(iu)
         freq = self.hist.sum(axis=1) / self.hist.sum()
         fwavacc = (freq[freq > 0] * iu[freq > 0]).sum()
-        return acc, acc_cls, iu, mean_iu, fwavacc
+        cls_iu = dict(zip(range(self.num_classes), iu))
+        return {
+            "Overall Acc": acc,
+            "Mean Acc": acc_cls,
+            "FreqW Acc": fwavacc,
+            "Mean IoU": mean_iu,
+            "Class IoU": cls_iu
+        }

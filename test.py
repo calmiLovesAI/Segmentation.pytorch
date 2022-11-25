@@ -25,7 +25,12 @@ def main():
 
     model = cfg["model"]
     model.to(device=device)
-    model.load_state_dict(torch.load(args.ckpt, map_location=device)["model_state"])
+    checkpoint = torch.load(args.ckpt, map_location=device)
+    if "model_state" in checkpoint:
+        model.load_state_dict(checkpoint["model_state"])
+    else:
+        model.load_state_dict(checkpoint)
+    del checkpoint  # free memory
 
     test_images = cfg["Test"]["test_pictures"]
     for img in test_images:
@@ -52,7 +57,7 @@ def main():
         result = torch.permute(result, dims=[1, 2, 0])   # (c, h, w) -> (h, w, c)
         result = result.cpu().numpy()
         # blend foreground and background
-        result = blend(foreground=result, background=original_img, weight=0.65)
+        result = blend(foreground=result, background=original_img, weight=0.5)
         # rgb -> bgr
         result = result[..., ::-1]
         print(f"Writing result of {image_path}")

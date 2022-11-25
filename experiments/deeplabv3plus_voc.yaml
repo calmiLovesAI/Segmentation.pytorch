@@ -18,8 +18,8 @@ Train:
   crop_size:
     - 513
     - 513
-  learning_rate: 0.001
-  step_size: 30
+  learning_rate: 0.01
+  step_size: 50
   load_weights: ""
   save_frequency: 10
   save_path: "outputs"
