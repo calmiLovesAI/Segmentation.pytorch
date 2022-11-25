@@ -79,17 +79,17 @@ def train_loop(cfg, model, train_dataloader, valid_dataloader):
             writer.add_scalar(tag="Overall Acc", scalar_value=score["Overall Acc"], global_step=epoch)
             writer.add_scalar(tag="Mean Acc", scalar_value=score["Mean Acc"], global_step=epoch)
             writer.add_scalar(tag="FreqW Acc", scalar_value=score["FreqW Acc"], global_step=epoch)
-            writer.add_scalar(tag="Mean IoU", scalar_value=score["Mean IoU"] * 100, global_step=epoch)
-            writer.add_scalar(tag="Class IoU", scalar_value=score["Class IoU"], global_step=epoch)
+            writer.add_scalar(tag="Mean IoU", scalar_value=score["Mean IoU"], global_step=epoch)
 
         if epoch % save_frequency == 0:
             saver.save_ckpt(epoch=epoch,
-                            filename=Path(save_path).joinpath(f"{model_name}_{dataset_name}_score={score}.pth"),
-                            score=score)
+                            filename=Path(save_path).joinpath(
+                                f"{model_name}_{dataset_name}_score={score['Mean IoU']}.pth"),
+                            score=score["Mean IoU"])
 
     saver.save_ckpt(epoch=epochs - 1,
-                    filename=Path(save_path).joinpath(f"{model_name}_{dataset_name}_score={score}.pth"),
-                    score=score)
+                    filename=Path(save_path).joinpath(f"{model_name}_{dataset_name}_score={score['Mean IoU']}.pth"),
+                    score=score["Mean IoU"])
     torch.save(model.state_dict(), Path(save_path).joinpath(f"{model_name}_{dataset_name}_weights.pth"))
 
     if tensorboard_on:
@@ -115,5 +115,5 @@ def evaluate_loop(cfg, model, dataloader):
 
     test_loss /= num_batches
     metric_results = metrics.get_results()
-    print(f"\nEvaluate: Loss: {test_loss:8f}, mIoU: {(metric_results['Mean IoU']):0.4f}")
+    print(f"\nEvaluate: Loss: {test_loss:8f}, mIoU: {metric_results['Mean IoU']:0.4f}")
     return metric_results
