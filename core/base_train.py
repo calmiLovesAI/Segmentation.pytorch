@@ -84,13 +84,16 @@ def train_loop(cfg, model, train_dataloader, valid_dataloader):
 
         if epoch % save_frequency == 0:
             saver.save_ckpt(epoch=epoch,
-                            filename=Path(save_path).joinpath(
-                                f"{model_name}_{dataset_name}_score={score['Mean IoU']}.pth"),
-                            score=score["Mean IoU"])
+                            save_root=save_path,
+                            filename_prefix=f"{model_name}_{dataset_name}",
+                            score=score["Mean IoU"],
+                            overwrite=True)
 
     saver.save_ckpt(epoch=epochs - 1,
-                    filename=Path(save_path).joinpath(f"{model_name}_{dataset_name}_score={score['Mean IoU']}.pth"),
-                    score=score["Mean IoU"])
+                    save_root=save_path,
+                    filename_prefix=f"{model_name}_{dataset_name}",
+                    score=score["Mean IoU"],
+                    overwrite=True)
     torch.save(model.state_dict(), Path(save_path).joinpath(f"{model_name}_{dataset_name}_weights.pth"))
 
     if tensorboard_on:

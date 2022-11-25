@@ -1,3 +1,6 @@
+import os.path
+from pathlib import Path
+
 import cv2
 import torch
 import yaml
@@ -44,16 +47,21 @@ class Saver:
         self.optimizer = optimizer
         self.scheduler = scheduler
 
-    def save_ckpt(self, epoch, filename, score):
+    def save_ckpt(self, epoch, save_root, filename_prefix, score, overwrite=False):
         if score > self.best_score:
+            if overwrite:
+                # Delete the model file of current best_score.
+                current_best_model_path = Path(save_root).joinpath(f"{filename_prefix}_score={self.best_score}.pth")
+                current_best_model_path.unlink()
             # save current model
+            file_path = Path(save_root).joinpath(f"{filename_prefix}_score={score}.pth")
             torch.save(obj={
                 "current_epoch": epoch,
                 "model_state": self.model.state_dict(),
                 "optimizer_state": self.optimizer.state_dict(),
                 "scheduler_state": self.scheduler.state_dict(),
                 "best_score": score,
-            }, f=filename)
+            }, f=file_path)
             self.best_score = score
 
 
