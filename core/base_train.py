@@ -26,10 +26,11 @@ def train_loop(cfg, model, train_dataloader, valid_dataloader):
     input_size = cfg["Train"]["input_size"]
     batch_size = cfg["Train"]["batch_size"]
     initial_learning_rate = cfg["Train"]["learning_rate"]
-    step_size = cfg["Train"]["step_size"]
+    milestones = cfg["Train"]["milestones"]
+    gamma = cfg["Train"]["gamma"]
 
     optimizer = get_optimizer(model=model, lr=initial_learning_rate)
-    scheduler = get_lr_scheduler(optimizer, step_size=step_size)
+    scheduler = get_lr_scheduler(optimizer, milestones=milestones, gamma=gamma)
 
     loss_mean = MeanMetric()
     saver = Saver(model, optimizer, scheduler)

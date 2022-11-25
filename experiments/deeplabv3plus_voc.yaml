@@ -19,7 +19,10 @@ Train:
     - 513
     - 513
   learning_rate: 0.01
-  step_size: 50
+  milestones:
+    - 50
+    - 80
+  gamma: 0.5
   load_weights: ""
   save_frequency: 1
   save_path: "outputs"
