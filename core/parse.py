@@ -32,12 +32,16 @@ def get_dataset(cfg: dict, dataset_name: str):
 
 
 def update_hyperparams(cfg: dict, opts):
-    cfg["Train"]["batch_size"] = opts.batch_size
-    cfg["Train"]["epochs"] = opts.epochs
-    cfg["Train"]["learning_rate"] = opts.lr
-    cfg["Train"]["step_size"] = opts.step_size
-    cfg["Train"]["save_frequency"] = opts.save_freq
-    cfg["Train"]["tensorboard_on"] = opts.tensorboard
+    if opts.batch_size != 0:
+        cfg["Train"]["batch_size"] = opts.batch_size
+    if opts.epochs != 0:
+        cfg["Train"]["epochs"] = opts.epochs
+    if opts.lr != 0.0:
+        cfg["Train"]["learning_rate"] = opts.lr
+    if opts.step_size != 0:
+        cfg["Train"]["step_size"] = opts.step_size
+    if opts.save_freq != 0:
+        cfg["Train"]["save_frequency"] = opts.save_freq
 
 
 def update_cfg(cfg: dict, opts, device, use_dataset=True) -> dict:

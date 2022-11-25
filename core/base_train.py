@@ -66,7 +66,7 @@ def train_loop(cfg, model, train_dataloader, valid_dataloader):
                 loss_mean.update(loss.item())
 
                 if tensorboard_on:
-                    writer.add_scalar(tag="Loss", scalar_value=loss_mean.result(),
+                    writer.add_scalar(tag="train/Loss", scalar_value=loss_mean.result(),
                                       global_step=epoch * len(train_dataloader) + i)
 
                 pbar.set_postfix({
@@ -74,12 +74,13 @@ def train_loop(cfg, model, train_dataloader, valid_dataloader):
                 })
         scheduler.step()
 
-        score = evaluate_loop(cfg, model, valid_dataloader)
+        test_loss, score = evaluate_loop(cfg, model, valid_dataloader)
         if tensorboard_on:
-            writer.add_scalar(tag="Overall Acc", scalar_value=score["Overall Acc"], global_step=epoch)
-            writer.add_scalar(tag="Mean Acc", scalar_value=score["Mean Acc"], global_step=epoch)
-            writer.add_scalar(tag="FreqW Acc", scalar_value=score["FreqW Acc"], global_step=epoch)
-            writer.add_scalar(tag="Mean IoU", scalar_value=score["Mean IoU"], global_step=epoch)
+            writer.add_scalar(tag="val/Loss", scalar_value=test_loss, global_step=epoch)
+            writer.add_scalar(tag="val/Overall Acc", scalar_value=score["Overall Acc"], global_step=epoch)
+            writer.add_scalar(tag="val/Mean Acc", scalar_value=score["Mean Acc"], global_step=epoch)
+            writer.add_scalar(tag="val/FreqW Acc", scalar_value=score["FreqW Acc"], global_step=epoch)
+            writer.add_scalar(tag="val/Mean IoU", scalar_value=score["Mean IoU"], global_step=epoch)
 
         if epoch % save_frequency == 0:
             saver.save_ckpt(epoch=epoch,
@@ -116,4 +117,4 @@ def evaluate_loop(cfg, model, dataloader):
     test_loss /= num_batches
     metric_results = metrics.get_results()
     print(f"\nEvaluate: Loss: {test_loss:8f}, mIoU: {metric_results['Mean IoU']:0.4f}")
-    return metric_results
+    return test_loss, metric_results
