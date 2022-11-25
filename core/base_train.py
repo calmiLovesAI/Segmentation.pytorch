@@ -115,5 +115,5 @@ def evaluate_loop(cfg, model, dataloader):
 
     test_loss /= num_batches
     metric_results = metrics.get_results()
-    print(f"\nEvaluate: Loss: {test_loss:8f}, mIoU: {(metric_results['Mean IoU'] * 100):0.2f}")
+    print(f"\nEvaluate: Loss: {test_loss:8f}, mIoU: {(metric_results['Mean IoU']):0.4f}")
     return metric_results
