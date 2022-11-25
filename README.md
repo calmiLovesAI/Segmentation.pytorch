@@ -20,6 +20,11 @@ data
 ```commandline
 python train.py --cfg experiments/deeplabv3plus_voc.yaml
 ```
+During training, you can use the command
+```commandline
+tensorboard --logdir=runs
+```
+in the console to enter the tensorboard panel to visualize the training process.
 
 ### 1.3 Evaluate
 + Evaluate on PASCAL VOC2012 val set (DeeplabV3+ for example)
