@@ -3,7 +3,7 @@ from typing import List
 import torch
 from torch.utils.data import DataLoader
 
-from datasets.transform import ToTensor, RGB2idx, Compose, RandomCrop, Resize
+from datasets.transform import ToTensor, RGB2idx, Compose, RandomCrop, Resize, Normalize, RandomHorizontalFlip
 from datasets.voc import VOCSegmentation, VOC_COLORMAP
 
 
@@ -36,6 +36,9 @@ def get_voc_dataloader(cfg, is_train=True):
                                       RGB2idx(voc_colormap2label),
                                       Resize(size=base_size),
                                       RandomCrop(*crop_size),
+                                      RandomHorizontalFlip(),
+                                      Normalize(mean=[0.485, 0.456, 0.406],
+                                                std=[0.229, 0.224, 0.225])
                                   ]))
         print(f"Loading train dataset with {len(dataset)} samples")
         return DataLoader(dataset, batch_size=batch_size, shuffle=True)
@@ -45,7 +48,9 @@ def get_voc_dataloader(cfg, is_train=True):
                                   transform=Compose([
                                       ToTensor(),
                                       RGB2idx(voc_colormap2label),
-                                      Resize(size=tuple(crop_size))
+                                      Resize(size=tuple(crop_size)),
+                                      Normalize(mean=[0.485, 0.456, 0.406],
+                                                std=[0.229, 0.224, 0.225])
                                   ]))
         print(f"Loading val dataset with {len(dataset)} samples")
         return DataLoader(dataset, batch_size=batch_size, shuffle=False)

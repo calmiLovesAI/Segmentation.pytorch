@@ -1,3 +1,5 @@
+import random
+
 import numpy as np
 import torch
 import torchvision.transforms
@@ -80,3 +82,47 @@ class RandomCrop:
 
     def __repr__(self):
         return f"{self.__class__.__name__}(height={self.height}, width={self.width})"
+
+
+class Normalize:
+    def __init__(self, mean, std):
+        self.mean = mean
+        self.std = std
+
+    def __call__(self, image, target):
+        """
+        Args:
+            tensor (Tensor): Tensor image of size (C, H, W) to be normalized.
+            tensor (Tensor): Tensor of label.
+        Returns:
+            Tensor: Normalized Tensor image.
+            Tensor: Unchanged Tensor label
+        """
+        return F.normalize(image, mean=self.mean, std=self.std), target
+
+    def __repr__(self):
+        return self.__class__.__name__ + '(mean={0}, std={1})'.format(self.mean, self.std)
+
+
+class RandomHorizontalFlip:
+    """Horizontally flip the given Tensor randomly with a given probability.
+    Args:
+        p (float): probability of the image being flipped. Default value is 0.5
+    """
+
+    def __init__(self, p=0.5):
+        self.p = p
+
+    def __call__(self, image, target):
+        """
+        Args:
+            image (PIL Image): Image to be flipped.
+        Returns:
+            PIL Image: Randomly flipped image.
+        """
+        if random.random() < self.p:
+            return F.hflip(image), F.hflip(target)
+        return image, target
+
+    def __repr__(self):
+        return self.__class__.__name__ + '(p={})'.format(self.p)
