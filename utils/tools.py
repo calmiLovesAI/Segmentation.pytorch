@@ -33,6 +33,18 @@ def load_yaml(filepath: List[str]) -> dict:
     return cfg
 
 
+def show_cfg(cfg):
+    for k, v in cfg.items():
+        if k not in ["model", "train_dataloader", "valid_dataloader"]:
+            if isinstance(v, dict):
+                print("-----------------------------")
+                print(f"{k}: ")
+                show_cfg(v)
+                print("-----------------------------")
+            else:
+                print(f"{k}: {v}")
+
+
 def cv2_read_image(image_path):
     image_array = cv2.imread(image_path, cv2.IMREAD_COLOR | cv2.IMREAD_IGNORE_ORIENTATION)
     image_array = cv2.cvtColor(image_array, cv2.COLOR_BGR2RGB)  # (H, W, C(R, G, B)) (0~255) dtype = np.uint8
@@ -46,21 +58,33 @@ class Saver:
         self.optimizer = optimizer
         self.scheduler = scheduler
 
+    def set_best_score(self, best_score):
+        self.best_score = best_score
+
     def save_ckpt(self, epoch, save_root, filename_prefix, score, overwrite=False):
         if score > self.best_score:
             if overwrite:
                 # Delete the model file of current best_score.
-                current_best_model_path = Path(save_root).joinpath(f"{filename_prefix}_score={self.best_score}.pth")
-                current_best_model_path.unlink()
+                if self.best_score != 0.0:
+                    current_best_model_path = Path(save_root).joinpath(f"{filename_prefix}_score={self.best_score}.pth")
+                    current_best_model_path.unlink()
+                    print(f"Remove ckpt: {current_best_model_path}")
             # save current model
             file_path = Path(save_root).joinpath(f"{filename_prefix}_score={score}.pth")
-            torch.save(obj={
-                "current_epoch": epoch,
-                "model_state": self.model.state_dict(),
-                "optimizer_state": self.optimizer.state_dict(),
-                "scheduler_state": self.scheduler.state_dict(),
-                "best_score": score,
-            }, f=file_path)
+            if self.scheduler != "None":
+                torch.save(obj={
+                    "current_epoch": epoch,
+                    "model_state": self.model.state_dict(),
+                    "optimizer_state": self.optimizer.state_dict(),
+                    "scheduler_state": self.scheduler.state_dict(),
+                    "best_score": score,
+                }, f=file_path)
+            else:
+                torch.save(obj={
+                    "current_epoch": epoch,
+                    "model_state": self.model.state_dict(),
+                    "optimizer_state": self.optimizer.state_dict(),
+                    "best_score": score,
+                }, f=file_path)
             self.best_score = score
-
-
+            print(f"New ckpt {file_path} saved.")

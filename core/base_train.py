@@ -7,13 +7,12 @@ from tqdm import tqdm
 from core.loss import cross_entropy
 from core.metrics import SegmentationMetrics
 from core.optimizer import get_optimizer, get_lr_scheduler
-from utils.tools import MeanMetric, Saver
+from utils.tools import MeanMetric, Saver, show_cfg
 
 
 def train_loop(cfg, model, train_dataloader, valid_dataloader):
-    print("The training hyperparameters are as follows:")
-    for k, v in cfg["Train"].items():
-        print(f"{k} : {v}")
+    print("The parameters in the configuration file are as follows:")
+    show_cfg(cfg)
     device = cfg["device"]
     model_name = cfg["Model"]["name"]
     dataset_name = cfg["Dataset"]["name"]
@@ -26,11 +25,13 @@ def train_loop(cfg, model, train_dataloader, valid_dataloader):
     input_size = cfg["Train"]["input_size"]
     batch_size = cfg["Train"]["batch_size"]
     initial_learning_rate = cfg["Train"]["learning_rate"]
+    optimizer_name = cfg["Train"]["optimizer"]
+    scheduler_name = cfg["Train"]["scheduler"]
     milestones = cfg["Train"]["milestones"]
     gamma = cfg["Train"]["gamma"]
 
-    optimizer = get_optimizer(model=model, lr=initial_learning_rate)
-    scheduler = get_lr_scheduler(optimizer, milestones=milestones, gamma=gamma)
+    optimizer = get_optimizer(model=model, optimizer_name=optimizer_name, lr=initial_learning_rate)
+    scheduler = get_lr_scheduler(optimizer, scheduler_name=scheduler_name, milestones=milestones, gamma=gamma)
 
     loss_mean = MeanMetric()
     saver = Saver(model, optimizer, scheduler)
@@ -39,8 +40,10 @@ def train_loop(cfg, model, train_dataloader, valid_dataloader):
         ckpt = torch.load(ckpt_file, map_location=device)
         model.load_state_dict(ckpt["model_state"])
         optimizer.load_state_dict(ckpt["optimizer_state"])
-        scheduler.load_state_dict(ckpt["scheduler_state"])
+        if scheduler != "None":
+            scheduler.load_state_dict(ckpt["scheduler_state"])
         start_epoch = ckpt["current_epoch"] + 1
+        saver.set_best_score(best_score=ckpt["best_score"])
         print(f"Successfully loaded checkpoint: {ckpt_file}!")
         del ckpt  # free memory
     else:
@@ -73,7 +76,8 @@ def train_loop(cfg, model, train_dataloader, valid_dataloader):
                 pbar.set_postfix({
                     "loss": f"{loss_mean.result()}",
                 })
-        scheduler.step()
+        if scheduler != "None":
+            scheduler.step()
 
         test_loss, score = evaluate_loop(cfg, model, valid_dataloader)
         if tensorboard_on:
