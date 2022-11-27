@@ -36,6 +36,12 @@ class Compose:
         return format_string
 
 
+class PIL2Numpy:
+    def __call__(self, image, target):
+        target = target.convert("RGB")
+        return np.asarray(image), np.asarray(target)
+
+
 class ToTensor:
     def __call__(self, image, target):
         return F.to_tensor(image), target
