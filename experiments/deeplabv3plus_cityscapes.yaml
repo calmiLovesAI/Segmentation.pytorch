@@ -6,8 +6,8 @@ Model:
   output_stride: 16
 Dataset:
   root: "data"
-  name: "VOC"
-  num_classes: 21
+  name: "Cityscapes"
+  num_classes: 19
 Train:
   epochs: 100
   batch_size: 8
