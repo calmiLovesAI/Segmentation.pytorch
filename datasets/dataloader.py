@@ -34,6 +34,7 @@ def get_cityscapes_dataloader(cfg, is_train=True):
     if is_train:
         dataset = torchvision.datasets.Cityscapes(root=root,
                                                   split="train",
+                                                  target_type="semantic",
                                                   transforms=Compose([
                                                       PIL2Numpy(),
                                                       ToTensor(),
@@ -49,6 +50,7 @@ def get_cityscapes_dataloader(cfg, is_train=True):
     else:
         dataset = torchvision.datasets.Cityscapes(root=root,
                                                   split="val",
+                                                  target_type="semantic",
                                                   transforms=Compose([
                                                       PIL2Numpy(),
                                                       ToTensor(),
