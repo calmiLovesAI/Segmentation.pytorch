@@ -45,7 +45,7 @@ class VOCSegmentation(Dataset):
         super(VOCSegmentation, self).__init__()
         self.transform = transform
 
-        voc_root = os.path.join(root, "VOCdevkit", "VOC2012")
+        voc_root = os.path.join(root, "VOC2012")
         if not os.path.isdir(voc_root):
             raise RuntimeError("Dataset not found.")
         splits_dir = os.path.join(voc_root, "ImageSets", "Segmentation")

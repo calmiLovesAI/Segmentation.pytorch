@@ -5,7 +5,7 @@ Model:
     pretrained: false
   output_stride: 16
 Dataset:
-  root: "data"
+  root: "data/VOCdevkit"
   name: "VOC"
   num_classes: 21
 Train:

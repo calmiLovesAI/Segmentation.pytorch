@@ -5,7 +5,7 @@ Model:
     pretrained: false
   output_stride: 16
 Dataset:
-  root: "data"
+  root: "data/Cityscapes"
   name: "Cityscapes"
   num_classes: 19
 Train:

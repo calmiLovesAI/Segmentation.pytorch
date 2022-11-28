@@ -39,7 +39,7 @@ class Compose:
 class PIL2Numpy:
     def __call__(self, image, target):
         target = target.convert("RGB")
-        return np.asarray(image), np.asarray(target)
+        return np.array(image), np.array(target)
 
 
 class ToTensor:

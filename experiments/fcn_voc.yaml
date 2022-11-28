@@ -1,7 +1,7 @@
 Model:
   name: "FCN"
 Dataset:
-  root: "data"
+  root: "data/VOCdevkit"
   name: "VOC"
   num_classes: 20
 Train:
