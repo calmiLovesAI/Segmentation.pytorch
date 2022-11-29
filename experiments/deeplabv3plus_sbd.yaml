@@ -5,8 +5,8 @@ Model:
     pretrained: false
   output_stride: 16
 Dataset:
-  root: "data/VOCdevkit"
-  name: "VOC"
+  root: "data/SBD"
+  name: "SBD"
   num_classes: 21
 Train:
   epochs: 100

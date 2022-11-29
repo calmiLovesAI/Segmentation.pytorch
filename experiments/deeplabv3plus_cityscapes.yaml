@@ -19,7 +19,7 @@ Train:
     - 513
     - 513
   loss_type: "ce"
-  learning_rate: 0.01
+  learning_rate: 0.001
   optimizer: "AdamW"
   scheduler: "None"
   milestones:

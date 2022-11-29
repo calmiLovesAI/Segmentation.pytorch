@@ -3,11 +3,6 @@ import torch.nn as nn
 import torch.nn.functional as F
 
 
-# def cross_entropy(input, target):
-#     loss = F.cross_entropy(input, target, reduction="none").mean(dim=1).mean(dim=1)
-#     return torch.mean(loss)
-
-
 class FocalLoss(nn.Module):
     def __init__(self, alpha=0.25, gamma=2, size_average=True, ignore_index=-100):
         super(FocalLoss, self).__init__()

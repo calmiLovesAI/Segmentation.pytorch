@@ -1,6 +1,6 @@
 # Get the model and dataloader from the configuration dict
 
-from datasets.dataloader import get_voc_dataloader, get_cityscapes_dataloader
+from datasets.dataloader import get_voc_dataloader, get_cityscapes_dataloader, get_sbd_dataloader
 from models.fcn import FCN
 from models.unet import UNet
 from models.deeplab.deeplabv3plus import DeeplabV3Plus
@@ -30,6 +30,9 @@ def get_dataset(cfg: dict, dataset_name: str):
         case "cityscapes":
             train_dataloader = get_cityscapes_dataloader(cfg, True)
             valid_dataloader = get_cityscapes_dataloader(cfg, False)
+        case "sbd":
+            train_dataloader = get_sbd_dataloader(cfg, True)
+            valid_dataloader = get_sbd_dataloader(cfg, False)
 
     return train_dataloader, valid_dataloader
 

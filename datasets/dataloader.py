@@ -98,3 +98,44 @@ def get_voc_dataloader(cfg, is_train=True):
                                   ]))
         print(f"Loading val dataset with {len(dataset)} samples")
         return DataLoader(dataset, batch_size=batch_size, shuffle=False)
+
+
+def get_sbd_dataloader(cfg, is_train=True):
+    batch_size = cfg["Train"]["batch_size"]
+    root = cfg["Dataset"]["root"]
+    base_size = cfg["Train"]["input_size"][1:]
+    if isinstance(base_size, List):
+        base_size = max(base_size)
+        assert isinstance(base_size, int)
+    crop_size = cfg["Train"]["crop_size"]
+    voc_colormap2label = colormap2label(VOC_COLORMAP)
+    if is_train:
+        dataset = torchvision.datasets.SBDataset(root=root,
+                                                 image_set="train",
+                                                 mode="segmentation",
+                                                 transforms=Compose([
+                                                     PIL2Numpy(),
+                                                     ToTensor(),
+                                                     RGB2idx(voc_colormap2label),
+                                                     Resize(size=base_size),
+                                                     RandomCrop(*crop_size),
+                                                     RandomHorizontalFlip(),
+                                                     Normalize(mean=[0.485, 0.456, 0.406],
+                                                               std=[0.229, 0.224, 0.225])
+                                                 ]))
+        print(f"Loading train dataset with {len(dataset)} samples")
+        return DataLoader(dataset, batch_size=batch_size, shuffle=True)
+    else:
+        dataset = torchvision.datasets.SBDataset(root=root,
+                                                 image_set="val",
+                                                 mode="segmentation",
+                                                 transforms=Compose([
+                                                     PIL2Numpy(),
+                                                     ToTensor(),
+                                                     RGB2idx(voc_colormap2label),
+                                                     Resize(size=tuple(crop_size)),
+                                                     Normalize(mean=[0.485, 0.456, 0.406],
+                                                               std=[0.229, 0.224, 0.225])
+                                                 ]))
+        print(f"Loading val dataset with {len(dataset)} samples")
+        return DataLoader(dataset, batch_size=batch_size, shuffle=False)
