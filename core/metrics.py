@@ -4,7 +4,7 @@ import numpy as np
 class SegmentationMetrics:
     def __init__(self, num_classes):
         self.num_classes = num_classes
-        self.hist = np.zeros((num_classes, num_classes))
+        self.confusion_matrix = np.zeros((num_classes, num_classes))
 
     def _fast_hist(self, label_pred, label_true):
         mask = (label_true >= 0) & (label_true < self.num_classes)
@@ -15,15 +15,16 @@ class SegmentationMetrics:
 
     def add_batch(self, predictions, gts):
         for lp, lt in zip(predictions, gts):
-            self.hist += self._fast_hist(lp.flatten(), lt.flatten())
+            self.confusion_matrix += self._fast_hist(lp.flatten(), lt.flatten())
 
     def get_results(self):
-        acc = np.diag(self.hist).sum() / self.hist.sum()
-        acc_cls = np.diag(self.hist) / self.hist.sum(axis=1)
+        hist = self.confusion_matrix
+        acc = np.diag(hist).sum() / hist.sum()
+        acc_cls = np.diag(hist) / hist.sum(axis=1)
         acc_cls = np.nanmean(acc_cls)
-        iu = np.diag(self.hist) / (self.hist.sum(axis=1) + self.hist.sum(axis=0) - np.diag(self.hist))
+        iu = np.diag(hist) / (hist.sum(axis=1) + hist.sum(axis=0) - np.diag(hist))
         mean_iu = np.nanmean(iu)
-        freq = self.hist.sum(axis=1) / self.hist.sum()
+        freq = hist.sum(axis=1) / hist.sum()
         fwavacc = (freq[freq > 0] * iu[freq > 0]).sum()
         cls_iu = dict(zip(range(self.num_classes), iu))
         return {
