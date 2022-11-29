@@ -97,4 +97,4 @@ class Saver:
                     "best_score": score,
                 }, f=file_path)
             self.best_score = score
-            print(f"New ckpt {file_path} saved.")
+            print(f"New ckpt {file_path} has been saved.")

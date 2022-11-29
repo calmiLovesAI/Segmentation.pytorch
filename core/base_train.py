@@ -1,10 +1,8 @@
-from pathlib import Path
-
 import torch
-from torch import nn
+
+from pathlib import Path
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
-
 from core.metrics import SegmentationMetrics
 from core.optimizer import get_optimizer, get_lr_scheduler
 from utils.tools import MeanMetric, Saver, show_cfg
@@ -79,7 +77,7 @@ def train_loop(cfg, model, criterion, train_dataloader, valid_dataloader):
         if scheduler != "None":
             scheduler.step()
 
-        test_loss, score = evaluate_loop(cfg, model, valid_dataloader)
+        test_loss, score = evaluate_loop(cfg, model, criterion, valid_dataloader)
         if tensorboard_on:
             writer.add_scalar(tag="val/Loss", scalar_value=test_loss, global_step=epoch)
             writer.add_scalar(tag="val/Overall Acc", scalar_value=score["Overall Acc"], global_step=epoch)
