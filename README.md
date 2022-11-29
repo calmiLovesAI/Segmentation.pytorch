@@ -14,11 +14,21 @@ data
             |-------SegmentationClass
             |-------SegmentationObject
 ```
+Put the [Semantic Boundaries Dataset](http://home.bharathh.info/pubs/codes/SBD/download.html) in the following path:
+```
+data
+  |---SBD
+       |---cls
+       |---img
+       |---inst
+       |---train.txt
+       |---val.txt
+```
 
 ### 1.2 Train
-+ Train on PASCAL VOC2012 train set (DeeplabV3+ for example)
++ Train on Semantic Boundaries Dataset (DeeplabV3+ for example)
 ```commandline
-python train.py --cfg experiments/deeplabv3plus_voc.yaml
+python train.py --cfg experiments/deeplabv3plus_sbd.yaml
 ```
 During training, you can use the command
 ```commandline
@@ -27,16 +37,16 @@ tensorboard --logdir=runs
 in the console to enter the tensorboard panel to visualize the training process.
 
 ### 1.3 Evaluate
-+ Evaluate on PASCAL VOC2012 val set (DeeplabV3+ for example)
++ Evaluate on Semantic Boundaries Dataset (DeeplabV3+ for example)
 ```commandline
-python train.py --cfg experiments/deeplabv3plus_voc.yaml --mode valid --ckpt outputs/DeeplabV3Plus_VOC_weights.pth
+python train.py --cfg experiments/deeplabv3plus_sbd.yaml --mode valid --ckpt outputs/DeeplabV3Plus_SBD_weights.pth
 ```
 
 
 ### 1.4 Test
 + Test on single image or several images (DeeplabV3+ for example)
 ```commandline
-python test.py --cfg experiments/deeplabv3plus_voc.yaml --ckpt outputs/DeeplabV3Plus_VOC_weights.pth
+python test.py --cfg experiments/deeplabv3plus_sbd.yaml --ckpt outputs/DeeplabV3Plus_SBD_weights.pth
 ```
 
 
