@@ -35,6 +35,10 @@ During training, you can use the command
 tensorboard --logdir=runs
 ```
 in the console to enter the tensorboard panel to visualize the training process.
++ Resume training
+```commandline
+python train.py --cfg experiments/deeplabv3plus_sbd.yaml --ckpt checkpoint_filepath
+```
 
 ### 1.3 Evaluate
 + Evaluate on Semantic Boundaries Dataset (DeeplabV3+ for example)
