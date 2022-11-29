@@ -1,16 +1,16 @@
 from pathlib import Path
 
 import torch
+from torch import nn
 from torch.utils.tensorboard import SummaryWriter
 from tqdm import tqdm
 
-from core.loss import cross_entropy
 from core.metrics import SegmentationMetrics
 from core.optimizer import get_optimizer, get_lr_scheduler
 from utils.tools import MeanMetric, Saver, show_cfg
 
 
-def train_loop(cfg, model, train_dataloader, valid_dataloader):
+def train_loop(cfg, model, criterion, train_dataloader, valid_dataloader):
     print("The parameters in the configuration file are as follows:")
     show_cfg(cfg)
     device = cfg["device"]
@@ -64,7 +64,7 @@ def train_loop(cfg, model, train_dataloader, valid_dataloader):
 
                 optimizer.zero_grad()
                 preds = model(images)
-                loss = cross_entropy(preds, targets)
+                loss = criterion(preds, targets)
                 loss.backward()
                 optimizer.step()
                 loss_mean.update(loss.item())
@@ -105,7 +105,7 @@ def train_loop(cfg, model, train_dataloader, valid_dataloader):
         writer.close()
 
 
-def evaluate_loop(cfg, model, dataloader):
+def evaluate_loop(cfg, model, criterion, dataloader):
     device = cfg["device"]
     model.eval()
     test_loss = 0.0
@@ -118,7 +118,7 @@ def evaluate_loop(cfg, model, dataloader):
             images = images.to(device)
             targets = targets.to(device)
             pred = model(images)
-            test_loss += cross_entropy(pred, targets).item()
+            test_loss += criterion(pred, targets).item()
             pred = torch.argmax(pred, dim=1)
             metrics.add_batch(predictions=pred.cpu().numpy(), gts=targets.cpu().numpy())
 

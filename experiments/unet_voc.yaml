@@ -29,6 +29,7 @@ Train:
   crop_size:
     - 320
     - 480
+  loss_type: "ce"
   # 初始学习率
   learning_rate: 0.001
   milestones:

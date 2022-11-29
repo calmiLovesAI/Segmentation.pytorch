@@ -47,6 +47,8 @@ def update_hyperparams(cfg: dict, opts):
         cfg["Train"]["save_frequency"] = opts.save_freq
     if opts.ckpt != "":
         cfg["Train"]["load_weights"] = opts.ckpt
+    if opts.loss_type != "":
+        cfg["Train"]["loss_type"] = opts.loss_type
 
 
 def update_cfg(cfg: dict, opts, device, use_dataset=True) -> dict:
