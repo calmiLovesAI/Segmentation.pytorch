@@ -3,7 +3,7 @@ import argparse
 
 from core.base_train import train_loop, evaluate_loop
 from core.parse import update_cfg
-from utils.tools import load_yaml
+from utils.tools import load_yaml, Saver
 
 
 def main():
@@ -32,7 +32,7 @@ def main():
     if opts.mode == "train":
         train_loop(cfg, model, train_dataloader, valid_dataloader)
     if opts.mode == "valid":
-        model.load_state_dict(torch.load(opts.ckpt, map_location=device))
+        Saver.load_ckpt(model, opts.ckpt, device)
         evaluate_loop(cfg, model, valid_dataloader)
 
 

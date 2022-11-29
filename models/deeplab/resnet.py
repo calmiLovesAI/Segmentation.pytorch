@@ -248,7 +248,7 @@ class ResNet(nn.Module):
         x = self.layer3(x)
         x = self.layer4(x)
 
-        return x, feats
+        return {"low_level": feats, "out": x}
 
     def forward(self, x: Tensor):
         return self._forward_impl(x)

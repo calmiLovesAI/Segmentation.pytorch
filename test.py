@@ -8,7 +8,7 @@ import torchvision.transforms.functional as F
 
 from core.parse import update_cfg
 from core.post_process import PostProcess
-from utils.tools import load_yaml, cv2_read_image
+from utils.tools import load_yaml, cv2_read_image, Saver
 from utils.vis import blend
 
 
@@ -25,12 +25,7 @@ def main():
 
     model = cfg["model"]
     model.to(device=device)
-    checkpoint = torch.load(args.ckpt, map_location=device)
-    if "model_state" in checkpoint:
-        model.load_state_dict(checkpoint["model_state"])
-    else:
-        model.load_state_dict(checkpoint)
-    del checkpoint  # free memory
+    Saver.load_ckpt(model, args.ckpt, device)
 
     test_images = cfg["Test"]["test_pictures"]
     for img in test_images:

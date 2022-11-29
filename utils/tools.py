@@ -3,6 +3,7 @@ from pathlib import Path
 import cv2
 import torch
 import yaml
+import torch.nn as nn
 from typing import List
 
 
@@ -60,6 +61,15 @@ class Saver:
 
     def set_best_score(self, best_score):
         self.best_score = best_score
+
+    @staticmethod
+    def load_ckpt(model, ckpt, device):
+        checkpoint = torch.load(ckpt, map_location=device)
+        if "model_state" in checkpoint:
+            model.load_state_dict(checkpoint["model_state"])
+        else:
+            model.load_state_dict(checkpoint)
+        del checkpoint  # free memory
 
     def save_ckpt(self, epoch, save_root, filename_prefix, score, overwrite=False):
         if score > self.best_score:
